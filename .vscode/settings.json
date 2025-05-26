@@ -1,0 +1,35 @@
+{
+
+    "cSpell.words": [
+        "cedula",
+        "codigo",
+        "descripcion",
+        "Enviroment",
+        "holaaa",
+        "iconeditar",
+        "iconeliminar",
+        "INSAI",
+        "Manejador",
+        "navegacion",
+        "Paginación",
+        "parametro",
+        "profesion",
+        "searchbart",
+        "taskform",
+        "Taskform"
+    ],
+
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "node_modules": true,
+        "client/node_modules": true,
+        
+    }
+    
+}
+
+

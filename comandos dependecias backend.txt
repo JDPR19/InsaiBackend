@@ -1,0 +1,25 @@
+configuraciones para el servidor paquete json.
+
+nmp install
+
+instalacion node , express y demas  //// comandos
+node = npm init -y
+express ,cors y morgan = npm i express cors morgan
+
+dotenv = nodemon = npm i nodemon -D 
+
+npm i dotenv // carga varibles de entorno desde un archivo
+
+//////////////
+base de datos posgrestssql install
+npm i pg
+
+////////////////////
+script para escuchar servidor // +  comando 
+"start":" node src/index.js"
+npm start
+
+script para actualizar cambios en el servidor con nodemon
+
+"dev":"nodemon src/index.js"
+npm run dev 
