@@ -1,4 +1,5 @@
 const pool = require('../db');
+const { registrarBitacora } = require('../registerBitacora');
 
 const getAllCargos = async (req, res, next) => {
     try {
@@ -31,6 +32,17 @@ const createCargo = async (req, res, next) => {
         const result = await pool.query('INSERT INTO cargo (nombre) VALUES ($1) RETURNING *', 
             [nombre] 
         );
+
+        // REGISTRO EN BITÁCORA
+        await registrarBitacora({
+            accion: 'REGISTRO',
+            tabla: 'cargos',
+            usuario: req.user.username,
+            usuario_id: req.user.id,
+            descripcion: `Se creó el cargo ${nombre}`,
+            dato: { nuevos: result.rows[0] }
+        });
+        
         return res.status(201).json(result.rows[0]);
     } catch (error) {
         console.error('Error creando un nuevo cargo:', error);
@@ -43,6 +55,8 @@ const updateCargo = async (req, res, next) => {
         const { id } = req.params;
         const { nombre } = req.body;
 
+         const oldCargo = await pool.query('SELECT * FROM cargo WHERE id = $1', [id]);
+
         const result = await pool.query (
             'UPDATE cargo SET nombre = $1 WHERE id = $2 RETURNING *',
             [nombre, id]
@@ -52,6 +66,17 @@ const updateCargo = async (req, res, next) => {
                 message: 'ERROR 404 --> Solicitud no existe o es imposible de encontrar <--'
             }); 
         }
+
+        // REGISTRO EN BITÁCORA
+        await registrarBitacora({
+            accion: 'ACTUALIZO',
+            tabla: 'cargos',
+            usuario: req.user.username,
+            usuario_id: req.user.id,
+            descripcion: `Se actualizó el cargo ${nombre}`,
+            dato: { antiguos: oldCargo.rows[0], nuevos: result.rows[0] }
+        });
+
         return res.json(result.rows[0])
     } catch (error) {
         console.error(`Error actualizando el cargo ${id}:`, error);
@@ -62,6 +87,9 @@ const updateCargo = async (req, res, next) => {
 const deleteCargo = async (req, res, next) => {
 
     const { id } = req.params;
+
+    const oldCargo = await pool.query('SELECT * FROM cargo WHERE id = $1', [id]);
+    
     try {
         const result = await pool.query('DELETE FROM cargo WHERE id = $1', 
             [id]
@@ -70,7 +98,19 @@ const deleteCargo = async (req, res, next) => {
         if(result.rowCount === 0) {
             return res.status(404).json({
             message: 'ERROR 404 --> Solicitud no existe o es imposible de encontrar <--'
-        }); }
+        }); 
+    }
+
+        // REGISTRO EN BITÁCORA
+        await registrarBitacora({
+            accion: 'ELIMINO',
+            tabla: 'cargos',
+            usuario: req.user.username,
+            usuario_id: req.user.id,
+            descripcion: `Se eliminó el cargo ${oldCargo.rows[0]?.nombre || id}`,
+            dato: { antiguos: oldCargo.rows[0] }
+        });
+        
         return res.sendStatus(204);
     } catch (error) {
         console.error(`Error eliminando el cargo ${id}:`, error);

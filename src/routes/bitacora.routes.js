@@ -17,11 +17,11 @@ router
 // Ruta para registrar inicio de sesión
 router
     .route('/inicio-sesion')
-    .post(verificarToken, checkPermiso('bitacora', 'crear'), inicioSesion);
+    .post(inicioSesion);
 
 // Ruta para registrar cierre de sesión
 router 
     .route('/cierre-sesion')
-    .post(verificarToken, checkPermiso('bitacora', 'crear'), cierreSesion);
+    .post(cierreSesion);
 
 module.exports = router;

@@ -1,4 +1,5 @@
 const pool = require('../db');
+const { registrarBitacora } = require('../registerBitacora');
 
 
 // Registrar inicio de sesión
@@ -10,11 +11,13 @@ const inicioSesion = async (req, res) => {
     }
 
     try {
-        await pool.query(
-            `INSERT INTO bitacora (fecha, accion, tabla, usuario, usuario_id, descripcion)
-            VALUES (NOW()::timestamp(0), 'Inicio de sesión', 'Sistema', $1, $2, 'El usuario inició sesión en el sistema')`,
-            [usuario, usuario_id]
-        );
+        await registrarBitacora({
+            accion: 'INICIO DE SESIÓN',
+            tabla: 'Sistema',
+            usuario,
+            usuario_id,
+            descripcion: 'El usuario inició sesión en el sistema'
+        });
         res.status(201).send('Inicio de sesión registrado en la bitácora');
     } catch (error) {
         console.error('Error al registrar el inicio de sesión:', error.message);
@@ -31,11 +34,13 @@ const cierreSesion = async (req, res) => {
     }
 
     try {
-        await pool.query(
-            `INSERT INTO bitacora (fecha, accion, tabla, usuario, usuario_id, descripcion)
-            VALUES (NOW()::timestamp(0), 'Cierre de sesión', 'Sistema', $1, $2, 'El usuario cerró sesión en el sistema')`,
-            [usuario, usuario_id]
-        );
+        await registrarBitacora({
+            accion: 'CIERRE DE SESIÓN',
+            tabla: 'Sistema',
+            usuario,
+            usuario_id,
+            descripcion: 'El usuario cerró sesión en el sistema'
+        });
         res.status(201).send('Cierre de sesión registrado en la bitácora');
     } catch (error) {
         console.error('Error al registrar el cierre de sesión:', error.message);
@@ -53,7 +58,7 @@ const listarBitacora = async (req, res) => {
                 TO_CHAR(bitacora.fecha, 'DD/MM/YYYY HH24:MI') AS fecha, 
                 bitacora.accion, 
                 bitacora.tabla, 
-                bitacora.usuario, -- El username ya está almacenado aquí
+                bitacora.usuario, 
                 bitacora.descripcion,
                 bitacora.dato
             FROM bitacora

@@ -11,12 +11,12 @@ const loginUsuario = async (req, res, next) => {
             `SELECT u.*, t.nombre AS tipo_usuario_nombre, t.permisos
             FROM usuarios u
             LEFT JOIN tipo_usuario t ON u.tipo_usuario_id = t.id
-            WHERE u.username = $1 OR u.email = $2`,
+            WHERE (u.username = $1 OR u.email = $2) AND u.estado = TRUE`,
             [username, username]
         );
 
         if (result.rows.length === 0) {
-            return res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
+            return res.status(401).json({ message: 'Usuario o contraseña incorrectos o Usuario no Existe' });
         }
 
         const user = result.rows[0];

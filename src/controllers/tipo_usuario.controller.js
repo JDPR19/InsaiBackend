@@ -26,15 +26,18 @@ const getTipoUsuario = async (req, res, next) => {
     }
 };
 
-// Crear un tipo de usuario
+// Crear 
 const createTipoUsuario = async (req, res, next) => {
     const { nombre, descripcion, permisos } = req.body;
     try {
+        const permisosJson = permisos ? JSON.stringify(permisos) : JSON.stringify({});
         const result = await pool.query(
             `INSERT INTO tipo_usuario (nombre, descripcion, permisos)
              VALUES ($1, $2, $3) RETURNING *`,
-            [nombre, descripcion, permisos || {}]
+            [nombre, descripcion, permisosJson || {}]
         );
+
+
         return res.status(201).json(result.rows[0]);
     } catch (error) {
         console.error('Error creando tipo de usuario:', error);
@@ -42,7 +45,7 @@ const createTipoUsuario = async (req, res, next) => {
     }
 };
 
-// Actualizar un tipo de usuario
+// Actualizar 
 const updateTipoUsuario = async (req, res, next) => {
     const { id } = req.params;
     let { nombre, descripcion, permisos } = req.body;
@@ -50,10 +53,13 @@ const updateTipoUsuario = async (req, res, next) => {
     try {
         // Si no se envía permisos, obtener el actual de la BD
         if (typeof permisos === 'undefined') {
+            
             const current = await pool.query('SELECT permisos FROM tipo_usuario WHERE id = $1', [id]);
+            
             if (current.rows.length === 0) {
                 return res.status(404).json({ message: 'Tipo de usuario no encontrado' });
             }
+            
             permisos = current.rows[0].permisos;
         }
 
@@ -65,6 +71,7 @@ const updateTipoUsuario = async (req, res, next) => {
         if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Tipo de usuario no encontrado' });
         }
+
         return res.json(result.rows[0]);
     } catch (error) {
         console.error(`Error actualizando tipo de usuario ${id}:`, error);
@@ -72,17 +79,20 @@ const updateTipoUsuario = async (req, res, next) => {
     }
 };
 
-// Eliminar (eliminación lógica, si quieres física cambia el query)
+// Eliminar 
 const deleteTipoUsuario = async (req, res, next) => {
     const { id } = req.params;
     try {
+
         const result = await pool.query(
             'DELETE FROM tipo_usuario WHERE id = $1 RETURNING *',
             [id]
         );
+        
         if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Tipo de usuario no encontrado' });
         }
+
         return res.sendStatus(204);
     } catch (error) {
         console.error(`Error eliminando tipo de usuario ${id}:`, error);

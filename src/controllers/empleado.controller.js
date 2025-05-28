@@ -1,4 +1,5 @@
 const pool = require('../db');
+const { registrarBitacora } = require('../registerBitacora');
 
 // Obtener todos los empleados con el nombre del cargo
 const getAllEmpleados = async (req, res, next) => {
@@ -66,12 +67,25 @@ const createEmpleado = async (req, res, next) => {
             "INSERT INTO empleados (cedula, nombre, apellido, contacto, cargo_id, estado) VALUES ($1, $2, $3, $4, $5, TRUE) RETURNING *",
             [cedula, nombre, apellido, contacto, cargo_id]
         );
+        
         const empleadoId = result.rows[0].id;
+        
         // Traer el empleado con el JOIN para incluir cargo_nombre
         const empleadoCompleto = await pool.query(
             "SELECT empleados.*, cargo.nombre AS cargo_nombre FROM empleados LEFT JOIN cargo ON empleados.cargo_id = cargo.id WHERE empleados.id = $1",
             [empleadoId]
         );
+
+        // REGISTRO EN BITÁCORA
+        await registrarBitacora({
+            accion: 'REGISTRO',
+            tabla: 'empleados',
+            usuario: req.user.username,
+            usuario_id: req.user.id,
+            descripcion: `Se creó el empleado ${nombre} ${apellido}`,
+            dato: { nuevos: result.rows[0] }
+        });
+
         return res.status(201).json(empleadoCompleto.rows[0]);
     } catch (error) {
         if (error.code === '23503') {
@@ -88,7 +102,14 @@ const updateEmpleado = async (req, res, next) => {
     const empleadoId = parseInt(id, 10);
     const { cedula, nombre, apellido, contacto, cargo_id, estado } = req.body;
 
+
     try {
+
+        const oldEmpleado = await pool.query('SELECT * FROM empleados WHERE id = $1', [id]);
+        if (oldEmpleado.rows.length === 0) {
+            return res.status(404).json({ message: 'Empleado no encontrado' });
+        }
+
         // Validar unicidad de la cédula (excepto para el propio registro)
         const existe = await pool.query(
             'SELECT id FROM empleados WHERE cedula = $1 AND id <> $2',
@@ -113,6 +134,16 @@ const updateEmpleado = async (req, res, next) => {
             [empleadoId]
         );
 
+         // REGISTRO EN BITÁCORA
+        await registrarBitacora({
+            accion: 'ACTUALIZO',
+            tabla: 'empleados',
+            usuario: req.user.username,
+            usuario_id: req.user.id,
+            descripcion: `Se actualizó el empleado ${nombre} ${apellido}`,
+            dato: { antiguos: oldEmpleado.rows[0], nuevos: result.rows[0] }
+        });
+
         return res.json(empleadoCompleto.rows[0]);
     } catch (error) {
         if (error.code === '23503') {
@@ -129,14 +160,32 @@ const deleteEmpleado = async (req, res, next) => {
     const empleadoId = parseInt(id, 10);
 
     try {
+
+        const oldEmpleado = await pool.query('SELECT * FROM empleados WHERE id = $1', [id]);
+        if (oldEmpleado.rows.length === 0) {
+            return res.status(404).json({ message: 'Empleado no encontrado' });
+        }
+        
         const result = await pool.query(
-            'UPDATE empleados SET estado = FALSE WHERE id = $1 RETURNING *',
+            'DELETE FROM empleados WHERE id = $1 RETURNING *',
+            // 'UPDATE empleados SET estado = FALSE WHERE id = $1 RETURNING *',
             [empleadoId]
         );
 
         if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Empleado no encontrado o ya inactivo' });
         }
+
+        // REGISTRO EN BITÁCORA
+        await registrarBitacora({
+            accion: 'ELIMINO',
+            tabla: 'empleados',
+            usuario: req.user.username,
+            usuario_id: req.user.id,
+            descripcion: `Se eliminó el empleado ${oldEmpleado.rows[0]?.nombre || id}`,
+            dato: { antiguos: oldEmpleado.rows[0] }
+        });
+        
         return res.sendStatus(204);
     } catch (error) {
         console.error(`Error desactivando el empleado ${id}:`, error);

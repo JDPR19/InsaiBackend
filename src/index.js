@@ -7,6 +7,7 @@ const loginRoutes = require('./routes/auth.routes');
 const bitacoraRoutes = require('./routes/bitacora.routes');
 const cargoRoutes = require('./routes/cargo.routes');
 const tipo_user = require('./routes/tipo_usuario.routes');
+const miusuario = require('./routes/miusuario.routes');
 
 
 
@@ -20,6 +21,7 @@ app.use(morgan('dev'));
 
 
 // Define la base para las rutas
+app.use('/miusuario', miusuario);
 app.use('/tipo_usuario', tipo_user);
 app.use('/cargo', cargoRoutes); 
 app.use('/empleados', empleadoRoutes);

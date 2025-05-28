@@ -1,6 +1,6 @@
 const { Router } = require('express');
-const checkPermiso = require('../checkPermisos');
 const verificarToken = require('../verificarToken'); 
+const checkPermiso = require('../checkPermisos');
 
 const { 
     getAllUsuarios, 
@@ -9,7 +9,8 @@ const {
     getCedulas,
     createUsuario, 
     updateUsuario, 
-    deleteUsuario 
+    deleteUsuario,
+    disableUsuario 
 } = require('../controllers/usuario.controller');
 
 const router = Router();
@@ -32,5 +33,9 @@ router
     .get(verificarToken, checkPermiso('usuarios', 'ver'), getUsuario)
     .put(verificarToken, checkPermiso('usuarios', 'editar'), updateUsuario)
     .delete(verificarToken, checkPermiso('usuarios', 'eliminar'), deleteUsuario);
+    
+router
+    .route('/:id/estado')
+    .patch(verificarToken, checkPermiso('usuarios', 'deshabilitar'), disableUsuario);
 
 module.exports = router;
