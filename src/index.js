@@ -8,6 +8,18 @@ const bitacoraRoutes = require('./routes/bitacora.routes');
 const cargoRoutes = require('./routes/cargo.routes');
 const tipo_user = require('./routes/tipo_usuario.routes');
 const miusuario = require('./routes/miusuario.routes');
+const tipo_propiedad = require('./routes/tipo_propiedad.routes');
+const tipo_solicitud = require('./routes/tipo_solicitud.routes');
+const tipo_programa = require('./routes/tipo_programa.routes');
+const tipo_productor = require('./routes/tipo_productor.routes');
+const tipo_plaga = require('./routes/tipo_plaga.routes');
+const tipo_permiso = require('./routes/tipo_permiso.routes');
+const tipo_laboratorio = require('./routes/tipo_laboratorio.routes');
+const tipo_inspeccion = require('./routes/tipo_inspeccion.routes');
+const tipo_evento = require('./routes/tipo_evento.routes');
+const tipo_cultivo = require('./routes/tipo_cultivo.routes');
+const estado = require('./routes/estado.routes');
+
 
 
 
@@ -20,7 +32,18 @@ app.use(morgan('dev'));
 
 
 
-// Define la base para las rutas
+// base para las rutas
+app.use('/estado', estado);
+app.use('/tipo_cultivo', tipo_cultivo);
+app.use('/tipo_evento', tipo_evento);
+app.use('/tipo_inspeccion', tipo_inspeccion);
+app.use('/tipo_laboratorio', tipo_laboratorio);
+app.use('/tipo_permiso', tipo_permiso);
+app.use('/tipo_programa', tipo_programa);
+app.use('/tipo_solicitud', tipo_solicitud);
+app.use('/tipo:plaga', tipo_plaga);
+app.use('/tipo_productor', tipo_productor);
+app.use('/tipo_propiedad', tipo_propiedad);
 app.use('/miusuario', miusuario);
 app.use('/tipo_usuario', tipo_user);
 app.use('/cargo', cargoRoutes); 

@@ -55,7 +55,7 @@ const updateCargo = async (req, res, next) => {
         const { id } = req.params;
         const { nombre } = req.body;
 
-         const oldCargo = await pool.query('SELECT * FROM cargo WHERE id = $1', [id]);
+        const oldCargo = await pool.query('SELECT * FROM cargo WHERE id = $1', [id]);
 
         const result = await pool.query (
             'UPDATE cargo SET nombre = $1 WHERE id = $2 RETURNING *',
@@ -77,7 +77,7 @@ const updateCargo = async (req, res, next) => {
             dato: { antiguos: oldCargo.rows[0], nuevos: result.rows[0] }
         });
 
-        return res.json(result.rows[0])
+        return res.json(result.rows[0]);
     } catch (error) {
         console.error(`Error actualizando el cargo ${id}:`, error);
         next(error);
