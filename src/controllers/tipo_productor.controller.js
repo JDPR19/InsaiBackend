@@ -4,7 +4,7 @@ const { registrarBitacora } = require('../registerBitacora');
 
 const getAlltipoProductor = async(req,res,next) => {
     try {
-        const alltipoProductor = await pool.query('SELECT * FROM tipo_productor ORDER BY DESC');
+        const alltipoProductor = await pool.query('SELECT * FROM tipo_productor ORDER BY id DESC');
         return res.json(alltipoProductor.rows);
     } catch (error) {
         console.error('Error obteniendo todos los tipos de productores:',error);
@@ -32,7 +32,7 @@ const getTipoProductor = async (req,res,next) => {
 const createTipoProductor = async (req, res, next) => {
     const {nombre} = req.body;
     try{
-        const result = pool.query('INSERT INTO tipo_productor (nombre) VALUES ($1) RETURNING *',
+        const result = await pool.query('INSERT INTO tipo_productor (nombre) VALUES ($1) RETURNING *',
             [nombre]
         );
         

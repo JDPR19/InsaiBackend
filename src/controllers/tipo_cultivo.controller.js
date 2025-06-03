@@ -4,7 +4,7 @@ const { registrarBitacora } = require('../registerBitacora');
 
 const getAlltipoCultivo = async(req,res,next) => {
     try {
-        const alltipoCultivo = await pool.query('SELECT * FROM tipo_cultivo ORDER BY DESC');
+        const alltipoCultivo = await pool.query('SELECT * FROM tipo_cultivo ORDER BY id DESC');
         return res.json(alltipoCultivo.rows);
     } catch (error) {
         console.error('Error obteniendo todos los tipos de cultivo:',error);
@@ -32,7 +32,7 @@ const getTipoCultivo = async (req,res,next) => {
 const createTipoCultivo = async (req, res, next) => {
     const {nombre} = req.body;
     try{
-        const result = pool.query('INSERT INTO tipo_cultivo (nombre) VALUES ($1) RETURNING *',
+        const result = await pool.query('INSERT INTO tipo_cultivo (nombre) VALUES ($1) RETURNING *',
             [nombre]
         );
         

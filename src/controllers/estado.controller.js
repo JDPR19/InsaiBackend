@@ -4,7 +4,7 @@ const { registrarBitacora } = require('../registerBitacora');
 const getAllEstados = async (req, res, next) => {
     
     try{
-        const allEstados = await pool.query('SELECT * FROM estado ORDER BY DESC');
+        const allEstados = await pool.query('SELECT * FROM estado ORDER BY id ASC');
         return res.json(allEstados.rows);
     }catch(error){
         console.error('Error obteniendo todos los estados',error);
@@ -36,7 +36,7 @@ const getEstado = async (req, res, next) => {
 const createEstado = async (req, res, next) => {
     const { nombre } = req.body;
     try{
-        const result = pool.query('INSERT INTO estado (nombre) VALUES ($1) RETURNING *', 
+        const result = await pool.query('INSERT INTO estado (nombre) VALUES ($1) RETURNING *', 
             [nombre]
         );
 

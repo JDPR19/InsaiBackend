@@ -4,7 +4,7 @@ const { registrarBitacora } = require('../registerBitacora');
 
 const getAlltipoInspeccion = async(req,res,next) => {
     try {
-        const alltipoInspeccion = await pool.query('SELECT * FROM tipo_inspeccion_fito ORDER BY DESC');
+        const alltipoInspeccion = await pool.query('SELECT * FROM tipo_inspeccion_fito ORDER BY id DESC');
         return res.json(alltipoInspeccion.rows);
     } catch (error) {
         console.error('Error obteniendo todos los tipos de Inspeccion:',error);
@@ -32,7 +32,7 @@ const getTipoInspeccion = async (req,res,next) => {
 const createTipoInspeccion = async (req, res, next) => {
     const {nombre} = req.body;
     try{
-        const result = pool.query('INSERT INTO tipo_inspeccion_fito (nombre) VALUES ($1) RETURNING *',
+        const result = await pool.query('INSERT INTO tipo_inspeccion_fito (nombre) VALUES ($1) RETURNING *',
             [nombre]
         );
         

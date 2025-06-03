@@ -9,14 +9,14 @@ const getMiUsuario = async (req, res, next) => {
         const result = await pool.query(`
             SELECT 
                 usuarios.*, 
-                tipo_usuario.nombre AS tipo_usuario_nombre, 
-                tipo_usuario.permisos, 
+                roles.nombre AS roles_nombre, 
+                roles.permisos, 
                 empleados.cedula, 
                 empleados.nombre AS empleado_nombre, 
                 empleados.apellido,
                 cargo.nombre AS cargo_nombre
                 FROM usuarios
-                LEFT JOIN tipo_usuario ON usuarios.tipo_usuario_id = tipo_usuario.id
+                LEFT JOIN roles ON usuarios.roles_id = roles.id
                 LEFT JOIN empleados ON usuarios.empleado_id = empleados.id
                 LEFT JOIN cargo ON empleados.cargo_id = cargo.id
                 WHERE usuarios.id = $1 AND usuarios.estado = TRUE

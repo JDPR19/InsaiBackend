@@ -19,7 +19,7 @@ router
 router
     .route('/:id')
     .get(verificarToken, checkPermiso('estado','ver'), getEstado)
-    .update(verificarToken, checkPermiso('estado','editar'), updateEstado)
+    .put(verificarToken, checkPermiso('estado','editar'), updateEstado)
     .delete(verificarToken, checkPermiso('estado','eliminar'), deleteEstado);
 
 

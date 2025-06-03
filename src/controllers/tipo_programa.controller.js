@@ -3,7 +3,7 @@ const { registrarBitacora } = require('../registerBitacora');
 
 const getAllTipoPrograma = async (req, res, next) => {
     try {
-        const allTipoPrograma = await pool.query('SELECT * FROM tipo_programa_fito ORDER BY DESC');
+        const allTipoPrograma = await pool.query('SELECT * FROM tipo_programa_fito ORDER BY id DESC');
         return res.json(allTipoPrograma.rows);
     } catch (error) {
         console.error('Error obteniendo todos los tipos de programa',error);
@@ -34,7 +34,7 @@ const getTipoPrograma = async (req, res, next) => {
 const createTipoPrograma = async (req, res, next) => {
     const { nombre } = req.body;
     try{
-        const result = await pool.query('INSERT INTO FROM tipo_programa_fito  (nombre) VALUES ($1) RETURNING *', 
+        const result = await pool.query('INSERT INTO  tipo_programa_fito  (nombre) VALUES ($1) RETURNING *', 
             [nombre]
         );
 
@@ -96,7 +96,7 @@ const deleteTipoPrograma = async (req, res, next) => {
     
     try{
 
-        const result = await pool.query('DELETE FROM tipo_programa_fito WHERE id = 1$',
+        const result = await pool.query('DELETE FROM tipo_programa_fito WHERE id = $1',
             [id]
         );
 

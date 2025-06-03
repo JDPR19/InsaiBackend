@@ -4,7 +4,7 @@ const { registrarBitacora } = require('../registerBitacora');
 
 const getAlltipoPlaga = async(req,res,next) => {
     try {
-        const alltipoPlaga = await pool.query('SELECT * FROM tipo_plaga_fito ORDER BY DESC');
+        const alltipoPlaga = await pool.query('SELECT * FROM tipo_plaga_fito ORDER BY id DESC');
         return res.json(alltipoPlaga.rows);
     } catch (error) {
         console.error('Error obteniendo todos los tipos de plaga:',error);
@@ -32,9 +32,13 @@ const getTipoPlaga = async (req,res,next) => {
 const createTipoPlaga = async (req, res, next) => {
     const {nombre} = req.body;
     try{
-        const result = pool.query('INSERT INTO tipo_plaga_fito (nombre) VALUES ($1) RETURNING *',
+        const result = await pool.query('INSERT INTO tipo_plaga_fito (nombre) VALUES ($1) RETURNING *',
             [nombre]
         );
+
+        if (!result.rows || result.rows.length === 0) {
+        return res.status(500).json({ message: 'No se pudo crear el registro' });
+    }
         
         await registrarBitacora({
             accion: 'RESGISTRO',

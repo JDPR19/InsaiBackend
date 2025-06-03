@@ -3,7 +3,7 @@ const { registrarBitacora } = require('../registerBitacora');
 
 const getAllCargos = async (req, res, next) => {
     try {
-        const allCargos = await pool.query('SELECT id, nombre FROM cargo ORDER BY nombre ASC');
+        const allCargos = await pool.query('SELECT * FROM cargo ORDER BY id ASC');
         return res.json(allCargos.rows);
     } catch (error) {
         console.error ('error obteniendo todos los cargos:', error);

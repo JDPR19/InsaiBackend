@@ -62,7 +62,7 @@ const listarBitacora = async (req, res) => {
                 bitacora.descripcion,
                 bitacora.dato
             FROM bitacora
-            ORDER BY fecha DESC;
+            ORDER BY id DESC;
         `);
         
         res.status(200).json(rows);

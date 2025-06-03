@@ -23,4 +23,4 @@ router
     .put(verificarToken, checkPermiso('tipo_evento', 'editar'), updateTipoEvento)
     .delete(verificarToken, checkPermiso('tipo_evento', 'eliminar'), deleteTipoEvento);
 
-module.exports = router;evento
+module.exports = router;

@@ -4,7 +4,7 @@ const { registrarBitacora } = require('../registerBitacora');
 
 const getAlltipoPermiso = async(req,res,next) => {
     try {
-        const alltipoPermiso = await pool.query('SELECT * FROM tipo_permiso ORDER BY DESC');
+        const alltipoPermiso = await pool.query('SELECT * FROM tipo_permiso ORDER BY id DESC');
         return res.json(alltipoPermiso.rows);
     } catch (error) {
         console.error('Error obteniendo todos los tipos de permiso:',error);
@@ -32,7 +32,7 @@ const getTipoPermiso = async (req,res,next) => {
 const createTipoPermiso = async (req, res, next) => {
     const {nombre} = req.body;
     try{
-        const result = pool.query('INSERT INTO tipo_permiso (nombre) VALUES ($1) RETURNING *',
+        const result = await pool.query('INSERT INTO tipo_permiso (nombre) VALUES ($1) RETURNING *',
             [nombre]
         );
         

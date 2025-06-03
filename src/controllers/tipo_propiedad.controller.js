@@ -4,7 +4,7 @@ const { registrarBitacora } = require('../registerBitacora');
 
 const getAlltipoPropiedad = async(req,res,next) => {
     try {
-        const alltipoPropiedad = await pool.query('SELECT * FROM tipo_propiedad ORDER BY DESC');
+        const alltipoPropiedad = await pool.query('SELECT * FROM tipo_propiedad ORDER BY id DESC');
         return res.json(alltipoPropiedad.rows);
     } catch (error) {
         console.error('Error obteniendo todos los tipos de propiedad:',error);
@@ -32,7 +32,7 @@ const getTipoPropiedad = async (req,res,next) => {
 const createTipoPropiedad = async (req, res, next) => {
     const {nombre} = req.body;
     try{
-        const result = pool.query('INSERT INTO tipo_propiedad (nombre) VALUES ($1) RETURNING *',
+        const result = await pool.query('INSERT INTO tipo_propiedad (nombre) VALUES ($1) RETURNING *',
             [nombre]
         );
         

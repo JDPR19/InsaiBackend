@@ -4,7 +4,7 @@ const { registrarBitacora } = require('../registerBitacora');
 
 const getAlltipoLaboratorio = async(req,res,next) => {
     try {
-        const alltipoLaboratorio = await pool.query('SELECT * FROM tipo_laboratorio ORDER BY DESC');
+        const alltipoLaboratorio = await pool.query('SELECT * FROM tipo_laboratorio ORDER BY id DESC');
         return res.json(alltipoLaboratorio.rows);
     } catch (error) {
         console.error('Error obteniendo todos los tipos de laboratorio:',error);
@@ -32,7 +32,7 @@ const getTipoLaboratorio = async (req,res,next) => {
 const createTipoLaboratorio = async (req, res, next) => {
     const {nombre} = req.body;
     try{
-        const result = pool.query('INSERT INTO tipo_laboratorio (nombre) VALUES ($1) RETURNING *',
+        const result = await pool.query('INSERT INTO tipo_laboratorio (nombre) VALUES ($1) RETURNING *',
             [nombre]
         );
         

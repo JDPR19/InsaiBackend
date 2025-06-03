@@ -1,9 +1,9 @@
 const pool = require('../db');
-const { registerBitacora } = require('../registerBitacora');
+const { registrarBitacora } = require('../registerBitacora');
 
 const getAllTipoSolicitud = async (req, res, next) => {
     try{
-        const allTipoSolicitud = await pool.query('SELECT * FROM tipo_solicitud ORDER BY DESC');
+        const allTipoSolicitud = await pool.query('SELECT * FROM tipo_solicitud ORDER BY id DESC');
         return res.json(allTipoSolicitud.rows);
     }catch(error){
         console.error('Error obteniendo todos los Tipos de solicitud', error);
@@ -38,7 +38,7 @@ const createTipoSolicitud = async (req, res, next) => {
             [nombre]
         );
 
-        await registerBitacora({
+        await registrarBitacora({
             accion: 'REGISTRO',
             tabla: 'tipo de solicitud',
             usuario: req.user.username,
@@ -47,7 +47,7 @@ const createTipoSolicitud = async (req, res, next) => {
             dato: {nuevo: result.rows[0]}
         });
 
-        result.status(201).json(result.rows[0]);
+        return res.status(201).json(result.rows[0]);
     }catch(error){
         console.error('error creando el tipo de solicitud',error);
         next(error);
@@ -90,7 +90,7 @@ const updateTipoSolicitud = async (req, res, next) => {
 const deleteTipoSolicitud = async (req, res, next) => {
     const { id } = req.params;
     
-    const oldTipoSolicitud = await pool.query('SELECT * FROM tipo_solicutd WHERE id = $1', [id]);
+    const oldTipoSolicitud = await pool.query('SELECT * FROM tipo_solicitud WHERE id = $1', [id]);
     
     try {
         const result = await pool.query('DELETE FROM tipo_solicitud WHERE id = $1',
@@ -103,7 +103,7 @@ const deleteTipoSolicitud = async (req, res, next) => {
                 });
             }
 
-            await registerBitacora({
+            await registrarBitacora({
                 accion: 'ELIMINO',
                 tabla: 'tipo de Solicitud',
                 usuario: req.user.username,
@@ -113,6 +113,9 @@ const deleteTipoSolicitud = async (req, res, next) => {
             });
             return res.sendStatus(204);
     } catch (error) {
+        if (error.code === '23505') { 
+            return res.status(400).json({ message: 'Ya existe un tipo de solicitud con ese nombre.' });
+        }
         console.error(`error eliminando el tipo de solicitud con id ${id}:`,error);
         next(error);
     }
@@ -124,4 +127,4 @@ module.exports = {
     createTipoSolicitud,
     updateTipoSolicitud,
     deleteTipoSolicitud
-}
+};

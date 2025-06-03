@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const verificarToken = require('../verificarToken');
-const checkPermisos = require('../checkPermisos');
+const checkPermiso = require('../checkPermisos');
 const {
     getAllTipoSolicitud,
     getTipoSolicitud,
@@ -13,13 +13,13 @@ const router = Router();
 
 router
     .route('/')
-    .get(verificarToken, checkPermisos('tipo_solicitud', 'ver'), getAllTipoSolicitud)
-    .post(verificarToken, checkPermisos('tipo_solicitud', 'crear'), createTipoSolicitud);
+    .get(verificarToken, checkPermiso('tipo_solicitud', 'ver'), getAllTipoSolicitud)
+    .post(verificarToken, checkPermiso('tipo_solicitud', 'crear'), createTipoSolicitud);
 
 router
     .route('/:id')
-    .get(verificarToken, checkPermisos('tipo_solicitud', 'ver'), getTipoSolicitud)
-    .put(verificarToken, checkPermisos('tipo_solicitud', 'editar'), updateTipoSolicitud)
-    .delete(verificarToken, checkPermisos('tipo_solicitud', 'eliminar'), deleteTipoSolicitud);
+    .get(verificarToken, checkPermiso('tipo_solicitud', 'ver'), getTipoSolicitud)
+    .put(verificarToken, checkPermiso('tipo_solicitud', 'editar'), updateTipoSolicitud)
+    .delete(verificarToken, checkPermiso('tipo_solicitud', 'eliminar'), deleteTipoSolicitud);
 
 module.exports = router;

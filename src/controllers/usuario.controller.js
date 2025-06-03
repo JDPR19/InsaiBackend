@@ -10,12 +10,12 @@ const getAllUsuarios = async (req, res, next) => {
                 usuarios.id,
                 usuarios.username, 
                 usuarios.email, 
-                usuarios.tipo_usuario_id,
+                usuarios.roles_id,
                 usuarios.empleado_id,
                 usuarios.estado,
-                tipo_usuario.nombre AS tipo_usuario_nombre
+                roles.nombre AS roles_nombre
                 FROM usuarios
-                LEFT JOIN tipo_usuario ON usuarios.tipo_usuario_id = tipo_usuario.id
+                LEFT JOIN roles ON usuarios.roles_id = roles.id
                 ORDER BY usuarios.id DESC
             `);
 
@@ -43,13 +43,13 @@ const getUsuario = async (req, res, next) => {
         const { id } = req.params;
         const result = await pool.query(`SELECT 
             usuarios.*, 
-            tipo_usuario.nombre AS tipo_usuario_nombre, 
-            tipo_usuario.permisos, 
+            roles.nombre AS roles_nombre, 
+            roles.permisos, 
             empleados.cedula, 
             empleados.nombre AS empleado_nombre, 
             empleados.apellido
             FROM usuarios
-            LEFT JOIN tipo_usuario ON usuarios.tipo_usuario_id = tipo_usuario.id
+            LEFT JOIN roles ON usuarios.roles_id = roles.id
             LEFT JOIN empleados ON usuarios.empleado_id = empleados.id
             WHERE 
             (usuarios.id = $1 OR usuarios.username = $2 OR usuarios.email = $3) 
@@ -83,7 +83,7 @@ const getCedulas = async (req, res) => {
 // En tipo_usuario.controller.js
 const getAllTipoUsuario = async (req, res, next) => {
     try {
-        const result = await pool.query('SELECT id, nombre, permisos FROM tipo_usuario ORDER BY nombre ASC');
+        const result = await pool.query('SELECT id, nombre, permisos FROM roles ORDER BY nombre ASC');
         return res.json(result.rows);
     } catch (error) {
         next(error);
@@ -93,15 +93,15 @@ const getAllTipoUsuario = async (req, res, next) => {
 // Crear un nuevo usuario
 const createUsuario = async (req, res, next) => {
     try {
-        const { username, password, email, tipo_usuario_id, empleado_id } = req.body;
-        if (!username || !password || !email || !tipo_usuario_id || !empleado_id) {
+        const { username, password, email, roles_id, empleado_id } = req.body;
+        if (!username || !password || !email || !roles_id || !empleado_id) {
             return res.status(400).json({ message: 'Todos los campos son obligatorios' });
         }
         const hashedPassword = await bcrypt.hash(password, 10);
         const result = await pool.query(
-            `INSERT INTO usuarios (username, password, email, tipo_usuario_id, empleado_id, estado)
+            `INSERT INTO usuarios (username, password, email, roles_id, empleado_id, estado)
              VALUES ($1, $2, $3, $4, $5, TRUE) RETURNING *`,
-            [username, hashedPassword, email, tipo_usuario_id, empleado_id]
+            [username, hashedPassword, email, roles_id, empleado_id]
         );
 
         // REGISTRO EN BITÁCORA
@@ -124,7 +124,7 @@ const createUsuario = async (req, res, next) => {
 // Actualizar un usuario existente
 const updateUsuario = async (req, res, next) => {
     const { id } = req.params;
-    const { username, password, email, tipo_usuario_id, empleado_id, estado = true } = req.body;
+    const { username, password, email, roles_id, empleado_id, estado = true } = req.body;
     try {
         let hashedPassword = null;
         if (password) {
@@ -135,9 +135,9 @@ const updateUsuario = async (req, res, next) => {
         
         const result = await pool.query(
             `UPDATE usuarios
-            SET username = $1, password = COALESCE($2, password), email = $3, tipo_usuario_id = $4, empleado_id = $5, estado = $6
+            SET username = $1, password = COALESCE($2, password), email = $3, roles_id = $4, empleado_id = $5, estado = $6
              WHERE id = $7 RETURNING *`,
-            [username, hashedPassword, email, tipo_usuario_id, empleado_id, estado, id]
+            [username, hashedPassword, email, roles_id, empleado_id, estado, id]
         );
         if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Usuario no encontrado o inactivo' });

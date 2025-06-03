@@ -8,9 +8,9 @@ const loginUsuario = async (req, res, next) => {
     try {
         // Buscar el usuario y su tipo de usuario
         const result = await pool.query(
-            `SELECT u.*, t.nombre AS tipo_usuario_nombre, t.permisos
+            `SELECT u.*, t.nombre AS roles_nombre, t.permisos
             FROM usuarios u
-            LEFT JOIN tipo_usuario t ON u.tipo_usuario_id = t.id
+            LEFT JOIN roles t ON u.roles_id = t.id
             WHERE (u.username = $1 OR u.email = $2) AND u.estado = TRUE`,
             [username, username]
         );
@@ -33,8 +33,8 @@ const loginUsuario = async (req, res, next) => {
             {
                 id: user.id,
                 username: user.username,
-                tipo_usuario_id: user.tipo_usuario_id,
-                permisos: user.permisos // <-- aquí
+                roles_id: user.roles_id,
+                permisos: user.permisos 
             },
             process.env.JWT_SECRET || 'secret',
             { expiresIn: '5h' }
@@ -46,9 +46,9 @@ const loginUsuario = async (req, res, next) => {
             user: {
                 id: user.id,
                 username: user.username,
-                tipo_usuario_id: user.tipo_usuario_id,
-                tipo_usuario_nombre: user.tipo_usuario_nombre,
-                permisos: user.permisos // <-- aquí
+                roles_id: user.roles_id,
+                roles_nombre: user.roles_nombre,
+                permisos: user.permisos 
             }
         });
     } catch (error) {

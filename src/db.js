@@ -8,7 +8,7 @@ const pool = new Pool({
     port: db.port,
     database: db.database,
 });
-
+console.log('Conectando a la base de datos:', db);
 // Prueba la conexión a PostgreSQL
 pool.query('SELECT NOW()', (err, res) => {
     if (err) {

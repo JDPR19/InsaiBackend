@@ -4,7 +4,7 @@ const { registrarBitacora } = require('../registerBitacora');
 
 const getAlltipoEvento = async(req,res,next) => {
     try {
-        const alltipoEvento = await pool.query('SELECT * FROM tipo_evento_epidemia ORDER BY DESC');
+        const alltipoEvento = await pool.query('SELECT * FROM tipo_evento_epidemia ORDER BY id DESC');
         return res.json(alltipoEvento.rows);
     } catch (error) {
         console.error('Error obteniendo todos los tipos de evento:',error);
@@ -32,7 +32,7 @@ const getTipoEvento = async (req,res,next) => {
 const createTipoEvento = async (req, res, next) => {
     const {nombre} = req.body;
     try{
-        const result = pool.query('INSERT INTO tipo_evento_epidemia (nombre) VALUES ($1) RETURNING *',
+        const result = await pool.query('INSERT INTO tipo_evento_epidemia (nombre) VALUES ($1) RETURNING *',
             [nombre]
         );
         
