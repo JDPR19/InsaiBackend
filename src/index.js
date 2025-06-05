@@ -21,6 +21,7 @@ const tipo_cultivo = require('./routes/tipo_cultivo.routes');
 const estado = require('./routes/estado.routes');
 const municipio = require('./routes/municipio.routes');
 const parroquia = require('./routes/parroquia.routes');
+const sector = require('./routes/sector.routes');
 
 
 
@@ -38,6 +39,7 @@ app.use(morgan('dev'));
 app.use('/estado', estado);
 app.use('/municipio', municipio);
 app.use('/parroquia', parroquia);
+app.use('/sector', sector);
 app.use('/tipo_cultivo', tipo_cultivo);
 app.use('/tipo_evento', tipo_evento);
 app.use('/tipo_inspeccion', tipo_inspeccion);

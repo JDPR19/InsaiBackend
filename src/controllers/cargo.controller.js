@@ -12,8 +12,8 @@ const getAllCargos = async (req, res, next) => {
 };
 
 const getCargo = async (req, res, next) => {
+    const { id } = req.params;
     try {
-        const { id } = req.params;
         const result = await pool.query ('SELECT * FROM cargo WHERE id = $1', [id]);
 
         if (result.rows.length === 0) {
@@ -51,8 +51,8 @@ const createCargo = async (req, res, next) => {
 };
 
 const updateCargo = async (req, res, next) => {
+    const { id } = req.params;
     try {
-        const { id } = req.params;
         const { nombre } = req.body;
 
         const oldCargo = await pool.query('SELECT * FROM cargo WHERE id = $1', [id]);

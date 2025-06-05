@@ -3,8 +3,17 @@ const { registrarBitacora } = require('../registerBitacora');
 
 const getAllMunicipios = async (req, res, next) => {
     try {
-        const allMunicipios = await pool.query('SELECT * FROM municipio ORDER BY id ASC');
-        return res.json(allMunicipios.rows);
+        const result = await pool.query(`
+            SELECT 
+                m.id AS id,
+                m.nombre AS nombre,
+                e.id AS estado_id,
+                e.nombre AS estado_nombre
+            FROM municipio m
+            JOIN estado e ON m.estado_id = e.id
+            ORDER BY m.id ASC
+        `);
+        return res.json(result.rows);
     } catch (error) {
         console.error('Error obteniendo todos los municipios', error);
         next(error);
@@ -26,7 +35,7 @@ const getMunicipio = async (req, res, next) => {
         const { id } = req.params;
         const result = await pool.query('SELECT * FROM municipio WHERE id = $1', [id]);
         if (result.rows.length === 0) {
-            return res.status(404).json({ message: `municipio no existe o imposible de encontrar` });
+            return res.status(404).json({ message: `Municipio no existe o imposible de encontrar` });
         }
         return res.json(result.rows[0]);
     } catch (error) {
@@ -47,7 +56,7 @@ const createMunicipio = async (req, res, next) => {
             tabla: 'municipios',
             usuario: req.user.username,
             usuario_id: req.user.id,
-            descripcion: `Se creo el municipio ${nombre}`,
+            descripcion: `Se creó el municipio ${nombre}`,
             dato: { nuevos: result.rows[0] }
         });
         return res.status(201).json(result.rows[0]);
@@ -67,14 +76,14 @@ const updateMunicipio = async (req, res, next) => {
             [nombre, estado_id, id]
         );
         if (result.rows.length === 0) {
-            return res.status(404).json({ message: 'ERROR 404 -->Solicitud no existe o es imposible de encontrar <--' });
+            return res.status(404).json({ message: 'ERROR 404 --> Solicitud no existe o es imposible de encontrar <--' });
         }
         await registrarBitacora({
             accion: 'ACTUALIZO',
             tabla: 'municipios',
             usuario: req.user.username,
             usuario_id: req.user.id,
-            descripcion: `Se actualizo el municipio ${nombre}`,
+            descripcion: `Se actualizó el municipio ${nombre}`,
             dato: { antiguos: oldMunicipio.rows[0], nuevos: result.rows[0] }
         });
         return res.json(result.rows[0]);
@@ -90,14 +99,14 @@ const deleteMunicipio = async (req, res, next) => {
     try {
         const result = await pool.query('DELETE FROM municipio WHERE id = $1', [id]);
         if (result.rowCount === 0) {
-            return res.status(404).json({ message: 'ERROR 404 -->Solicitud no existe o es imposible de encontrar <--' });
+            return res.status(404).json({ message: 'ERROR 404 --> Solicitud no existe o es imposible de encontrar <--' });
         }
         await registrarBitacora({
             accion: 'ELIMINO',
             tabla: 'municipio',
             usuario: req.user.username,
             usuario_id: req.user.id,
-            descripcion: `Se elimino el municipio ${oldMunicipio.rows[0]?.nombre || id}`,
+            descripcion: `Se eliminó el municipio ${oldMunicipio.rows[0]?.nombre || id}`,
             dato: { antiguos: oldMunicipio.rows[0] }
         });
         return res.sendStatus(204);

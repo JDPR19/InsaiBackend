@@ -3,8 +3,20 @@ const { registrarBitacora } = require('../registerBitacora');
 
 const getAllParroquias = async (req, res, next) => {
     try {
-        const allParroquias = await pool.query('SELECT * FROM parroquia ORDER BY id ASC');
-        return res.json(allParroquias.rows);
+        const result = await pool.query(`
+            SELECT 
+                p.id AS id,
+                p.nombre AS nombre,
+                m.id AS municipio_id,
+                m.nombre AS municipio_nombre,
+                e.id AS estado_id,
+                e.nombre AS estado_nombre
+            FROM parroquia p
+            JOIN municipio m ON p.municipio_id = m.id
+            JOIN estado e ON m.estado_id = e.id
+            ORDER BY p.id ASC
+        `);
+        return res.json(result.rows);
     } catch (error) {
         console.error('Error obteniendo todas las parroquias', error);
         next(error);

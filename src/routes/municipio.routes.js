@@ -18,7 +18,7 @@ router
     .post(verificarToken, checkPermiso('municipio','crear'), createMunicipio);
 
 router
-    .route('/estado/all')
+    .route('/estados/all')
     .get(verificarToken, checkPermiso('estado', 'ver'), getEstados);
 
 router
