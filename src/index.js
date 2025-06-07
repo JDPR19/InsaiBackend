@@ -22,6 +22,10 @@ const estado = require('./routes/estado.routes');
 const municipio = require('./routes/municipio.routes');
 const parroquia = require('./routes/parroquia.routes');
 const sector = require('./routes/sector.routes');
+const laboratorio = require('./routes/laboratorio.routes');
+const plagas = require('./routes/plaga.routes');
+const cultivo = require('./routes/cultivo.routes');
+const programa = require('./routes/programa.routes');
 
 
 
@@ -36,6 +40,10 @@ app.use(morgan('dev'));
 
 
 // base para las rutas
+app.use('/programa', programa);
+app.use('/cultivo', cultivo);
+app.use('/plagas', plagas);
+app.use('/laboratorio', laboratorio);
 app.use('/estado', estado);
 app.use('/municipio', municipio);
 app.use('/parroquia', parroquia);
