@@ -4,6 +4,7 @@ const cors = require('cors');
 const empleadoRoutes = require('./routes/empleado.routes');
 const usuarioRoutes = require('./routes/usuario.routes');
 const loginRoutes = require('./routes/auth.routes');
+const recuperacionRoutes = require('./routes/recuperacion.routes');
 const bitacoraRoutes = require('./routes/bitacora.routes');
 const cargoRoutes = require('./routes/cargo.routes');
 const tipo_usuario = require('./routes/tipo_usuario.routes');
@@ -64,6 +65,7 @@ app.use('/cargo', cargoRoutes);
 app.use('/empleados', empleadoRoutes);
 app.use('/usuarios', usuarioRoutes);
 app.use('/auth', loginRoutes);
+app.use('/recuperacion', recuperacionRoutes);
 app.use('/bitacora', bitacoraRoutes);
 
 
