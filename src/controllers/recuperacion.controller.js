@@ -2,7 +2,6 @@ const pool = require('../db');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 
-// Configura tu transportador de correo (ajusta según tu proveedor)
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -11,7 +10,6 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// 1. Solicitar código de recuperación
 const solicitarCodigo = async (req, res) => {
     const { email } = req.body;
     try {
@@ -42,7 +40,7 @@ const solicitarCodigo = async (req, res) => {
     }
 };
 
-// 2. Verificar código
+
 const verificarCodigo = async (req, res) => {
     const { email, code } = req.body;
     try {
@@ -65,7 +63,6 @@ const verificarCodigo = async (req, res) => {
     }
 };
 
-// 3. Cambiar contraseña
 const cambiarPassword = async (req, res) => {
     const { email, code, newPassword } = req.body;
     try {

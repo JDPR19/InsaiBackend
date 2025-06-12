@@ -33,7 +33,7 @@ router
     .get(verificarToken, checkPermiso('usuarios', 'ver'), getUsuario)
     .put(verificarToken, checkPermiso('usuarios', 'editar'), updateUsuario)
     .delete(verificarToken, checkPermiso('usuarios', 'eliminar'), deleteUsuario);
-    
+
 router
     .route('/:id/estado')
     .patch(verificarToken, checkPermiso('usuarios', 'deshabilitar'), disableUsuario);

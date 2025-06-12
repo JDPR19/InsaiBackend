@@ -76,7 +76,7 @@ const createPrograma = async (req, res, next) => {
         );
         await registrarBitacora({
             accion: 'REGISTRO',
-            tabla: 'programa_fito',
+            tabla: 'programa',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se creó el programa ${nombre}`,
@@ -104,7 +104,7 @@ const updatePrograma = async (req, res, next) => {
         }
         await registrarBitacora({
             accion: 'ACTUALIZO',
-            tabla: 'programa_fito',
+            tabla: 'programa',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se actualizó el programa ${nombre}`,
@@ -128,7 +128,7 @@ const deletePrograma = async (req, res, next) => {
         }
         await registrarBitacora({
             accion: 'ELIMINO',
-            tabla: 'programa_fito',
+            tabla: 'programa',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se eliminó el programa ${oldPrograma.rows[0]?.nombre || id}`,

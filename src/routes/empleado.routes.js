@@ -3,7 +3,7 @@ const checkPermiso = require('../checkPermisos');
 const verificarToken = require('../verificarToken'); 
 const { 
     getAllEmpleados, 
-    getEmpleado, 
+    getEmpleado,
     getAllCargos,
     createEmpleado, 
     updateEmpleado, 
@@ -21,6 +21,7 @@ router
 router
     .route('/cargos')
     .get(verificarToken, getAllCargos);
+
 
 router
     .route('/:id')

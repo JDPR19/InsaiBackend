@@ -27,7 +27,7 @@ const laboratorio = require('./routes/laboratorio.routes');
 const plagas = require('./routes/plaga.routes');
 const cultivo = require('./routes/cultivo.routes');
 const programa = require('./routes/programa.routes');
-
+const productor = require('./routes/productor.routes');
 
 
 
@@ -41,6 +41,7 @@ app.use(morgan('dev'));
 
 
 // base para las rutas
+app.use('/productor', productor);
 app.use('/programa', programa);
 app.use('/cultivo', cultivo);
 app.use('/plagas', plagas);

@@ -80,7 +80,7 @@ const getCedulas = async (req, res) => {
     }
 };
 
-// En tipo_usuario.controller.js
+
 const getAllTipoUsuario = async (req, res, next) => {
     try {
         const result = await pool.query('SELECT id, nombre, permisos FROM roles ORDER BY nombre ASC');
@@ -90,7 +90,7 @@ const getAllTipoUsuario = async (req, res, next) => {
     }
 };
 
-// Crear un nuevo usuario
+
 const createUsuario = async (req, res, next) => {
     try {
         const { username, password, email, roles_id, empleado_id } = req.body;

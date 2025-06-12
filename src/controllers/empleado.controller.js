@@ -34,6 +34,7 @@ const getEmpleado = async (req, res, next) => {
     }
 };
 
+
 // Obtener todos los cargos (para el select en el frontend)
 const getAllCargos = async (req, res, next) => {
     try {
