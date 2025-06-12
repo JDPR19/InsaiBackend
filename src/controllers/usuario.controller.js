@@ -35,26 +35,25 @@ const getAllUsuarios = async (req, res, next) => {
 // Obtener un usuario individual (por id, username o email)
 const getUsuario = async (req, res, next) => {
     try {
-        // Validación de permisos
-        if (req.user.id != req.params.id && req.user.rol !== 'admin') {
-            return res.status(403).json({ message: 'No tienes permiso para ver este usuario' });
-        }
+        
 
         const { id } = req.params;
-        const result = await pool.query(`SELECT 
-            usuarios.*, 
-            roles.nombre AS roles_nombre, 
-            roles.permisos, 
-            empleados.cedula, 
-            empleados.nombre AS empleado_nombre, 
-            empleados.apellido
-            FROM usuarios
-            LEFT JOIN roles ON usuarios.roles_id = roles.id
-            LEFT JOIN empleados ON usuarios.empleado_id = empleados.id
-            WHERE 
-            (usuarios.id = $1 OR usuarios.username = $2 OR usuarios.email = $3) 
-            AND usuarios.estado = TRUE;
-        `, [id, id, id]);
+        const result = await pool.query(`
+            SELECT 
+                usuarios.*, 
+                roles.nombre AS roles_nombre, 
+                roles.permisos, 
+                empleados.cedula, 
+                empleados.nombre AS empleado_nombre, 
+                empleados.apellido,
+                empleados.contacto,
+                cargo.nombre AS cargo_nombre
+                FROM usuarios
+                LEFT JOIN roles ON usuarios.roles_id = roles.id
+                LEFT JOIN empleados ON usuarios.empleado_id = empleados.id
+                LEFT JOIN cargo ON empleados.cargo_id = cargo.id
+                WHERE usuarios.id = $1 AND usuarios.estado = TRUE
+        `, [id]);
         if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Usuario no encontrado o inactivo' });
         }
