@@ -4,8 +4,9 @@ const checkPermiso = require('../checkPermisos');
 const {
     getAllProgramas,
     getPrograma,
-    getPlagas,
     getTiposPrograma,
+    getAllPlagas,
+    getAllEmpleados,
     createPrograma,
     updatePrograma,
     deletePrograma
@@ -18,14 +19,18 @@ router
     .get(verificarToken, checkPermiso('programa', 'ver'), getAllProgramas)
     .post(verificarToken, checkPermiso('programa', 'crear'), createPrograma);
 
-router
-    .route('/plagas/all')
-    .get(verificarToken, checkPermiso('plaga', 'ver'), getPlagas);
 
 router
     .route('/tipos/all')
     .get(verificarToken, checkPermiso('tipo_programa', 'ver'), getTiposPrograma);
 
+router
+    .route('/plagas/all')
+    .get(verificarToken, checkPermiso('plaga', 'ver'), getAllPlagas);
+
+router
+    .route('/empleados/all')
+    .get(verificarToken, checkPermiso('empleados', 'ver'), getAllEmpleados)
 router
     .route('/:id')
     .get(verificarToken, checkPermiso('programa', 'ver'), getPrograma)
