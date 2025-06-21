@@ -22,11 +22,9 @@ const getAllProgramas = async (req, res, next) => {
                 WHERE pe.programa_fito_id = $1
             `, [programa.id]);
 
-            programa.empleados_detalle = empleadosRes.rows
-            .map(e => `${e.nombre} ${e.apellido} (Cédula: ${e.cedula}, Cargo: ${e.cargo || 'Sin cargo'})`)
-            .join('<br>');
+                programa.empleados_detalle = empleadosRes.rows.map(e => `${e.nombre} ${e.apellido} (Cédula: ${e.cedula}, Cargo: ${e.cargo || 'Sin cargo'})`).join('<br>');
 
-            programa.empleados = empleadosRes.rows;
+                programa.empleados = empleadosRes.rows;
 
             
             const plagasRes = await pool.query(`
@@ -37,11 +35,22 @@ const getAllProgramas = async (req, res, next) => {
                 WHERE pp.programa_fito_id = $1
             `, [programa.id]);
 
-            programa.plagas_detalle = plagasRes.rows
-            .map(p => `${p.nombre} (${p.nombre_cientifico}, Tipo: ${p.tipo_plaga || 'Sin tipo'})`)
-            .join('<br>');
+                programa.plagas_detalle = plagasRes.rows.map(p => `${p.nombre} (${p.nombre_cientifico}, Tipo: ${p.tipo_plaga || 'Sin tipo'})`).join('<br>');
 
-            programa.plagas = plagasRes.rows;
+                programa.plagas = plagasRes.rows;
+
+            const cultivosRes = await pool.query(`
+            SELECT c.id, c.nombre, c.nombre_cientifico, tc.nombre AS tipo_cultivo
+            FROM programa_cultivo pc
+            JOIN cultivo c ON pc.cultivo_id = c.id
+            LEFT JOIN tipo_cultivo tc ON c.tipo_cultivo_id = tc.id
+            WHERE pc.programa_fito_id = $1
+        `, [programa.id]);
+
+                programa.cultivos_detalle = cultivosRes.rows.map(c => `${c.nombre} (${c.nombre_cientifico || 'Sin nombre científico'}, Tipo: ${c.tipo_cultivo || 'Sin tipo'})`).join('<br>');
+
+                programa.cultivos = cultivosRes.rows;
+
         }
 
         res.json(programas);
@@ -72,16 +81,24 @@ const getPrograma = async (req, res, next) => {
             SELECT e.id, e.nombre FROM programa_empleado pe
             JOIN empleados e ON pe.empleado_id = e.id
             WHERE pe.programa_fito_id = $1
-        `, [programa.id]);
-        programa.empleados = empleadosRes.rows;
+            `, [programa.id]);
+            programa.empleados = empleadosRes.rows;
 
         
         const plagasRes = await pool.query(`
             SELECT p.id, p.nombre FROM programa_plaga pp
             JOIN plaga_fito p ON pp.plaga_fito_id = p.id
             WHERE pp.programa_fito_id = $1
-        `, [programa.id]);
-        programa.plagas = plagasRes.rows;
+            `, [programa.id]);
+            programa.plagas = plagasRes.rows;
+
+        const cultivosRes = await pool.query(`
+            SELECT c.id, c.nombre
+            FROM programa_cultivo pc
+            JOIN cultivo c ON pc.cultivo_id = c.id
+            WHERE pc.programa_fito_id = $1
+            `, [programa.id]);
+            programa.cultivos = cultivosRes.rows;
 
         res.json(programa);
     } catch (error) {
@@ -105,6 +122,7 @@ const getAllEmpleados = async (req, res, next) => {
         const result = await pool.query('SELECT id, nombre FROM empleados ORDER BY nombre ASC');
         res.json(result.rows);
     } catch (error) {
+        console.error('Error obteniendo tOdos los empleados:', error);
         next(error);
     }
 };
@@ -114,14 +132,23 @@ const getAllPlagas = async (req, res, next) => {
         const result = await pool.query('SELECT id, nombre FROM plaga_fito ORDER BY nombre ASC');
         res.json(result.rows);
     } catch (error) {
+        console.error('Error obteniendo tOdas las plagas:', error);
         next(error);
     }
 };
 
-
+const getAllCultivos = async (req, res, next) => {
+    try {
+        const result = await pool.query('SELECT id, nombre FROM cultivo ORDER BY nombre ASC');
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Error obteniendo todos los cultivos:', error);
+        next(error);
+    }
+};
 
 const createPrograma = async (req, res, next) => {
-    const { nombre, descripcion, tipo_programa_fito_id, empleados_ids, plaga_fito_ids } = req.body;
+    const { nombre, descripcion, tipo_programa_fito_id, empleados_ids, plaga_fito_ids, cultivo_ids } = req.body;
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
@@ -152,6 +179,15 @@ const createPrograma = async (req, res, next) => {
             }
         }
 
+        if (Array.isArray(cultivo_ids)) {
+            for (const cultivo_id of cultivo_ids) {
+                await client.query(
+                    `INSERT INTO programa_cultivo (programa_fito_id, cultivo_id) VALUES ($1, $2)`,
+                    [programaId, cultivo_id]
+                );
+            }
+        }
+
         await registrarBitacora({
             accion: 'REGISTRO',
             tabla: 'programa',
@@ -175,7 +211,7 @@ const createPrograma = async (req, res, next) => {
 
 const updatePrograma = async (req, res, next) => {
     const { id } = req.params;
-    const { nombre, descripcion, tipo_programa_fito_id, empleados_ids, plaga_fito_ids } = req.body;
+    const { nombre, descripcion, tipo_programa_fito_id, empleados_ids, plaga_fito_ids, cultivo_ids } = req.body;
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
@@ -186,7 +222,7 @@ const updatePrograma = async (req, res, next) => {
 
         await client.query(`DELETE FROM programa_empleado WHERE programa_fito_id = $1`, [id]);
         await client.query(`DELETE FROM programa_plaga WHERE programa_fito_id = $1`, [id]);
-
+        await client.query(`DELETE FROM programa_cultivo WHERE programa_fito_id = $1`, [id]);
         
         if (Array.isArray(empleados_ids)) {
             for (const empleado_id of empleados_ids) {
@@ -202,6 +238,15 @@ const updatePrograma = async (req, res, next) => {
                 await client.query(
                     `INSERT INTO programa_plaga (programa_fito_id, plaga_fito_id) VALUES ($1, $2)`,
                     [id, plaga_fito_id]
+                );
+            }
+        }
+
+        if (Array.isArray(cultivo_ids)) {
+            for (const cultivo_id of cultivo_ids) {
+                await client.query(
+                    `INSERT INTO programa_cultivo (programa_fito_id, cultivo_id) VALUES ($1, $2)`,
+                    [id, cultivo_id]
                 );
             }
         }
@@ -231,6 +276,7 @@ const deletePrograma = async (req, res, next) => {
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
+        await client.query(`DELETE FROM programa_cultivo WHERE programa_fito_id = $1`, [id]);
         await client.query(`DELETE FROM programa_empleado WHERE programa_fito_id = $1`, [id]);
         await client.query(`DELETE FROM programa_plaga WHERE programa_fito_id = $1`, [id]);
         await client.query(`DELETE FROM programa_fito WHERE id = $1`, [id]);
@@ -252,6 +298,7 @@ module.exports = {
     getTiposPrograma,
     getAllPlagas,
     getAllEmpleados,
+    getAllCultivos,
     createPrograma,
     updatePrograma,
     deletePrograma

@@ -18,8 +18,8 @@ const solicitarCodigo = async (req, res) => {
             return res.status(404).json({ message: 'Correo no registrado' });
         }
         const usuario_id = userResult.rows[0].id;
-        const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6 dígitos
-        const expires_at = new Date(Date.now() + 10 * 60 * 1000); // 10 minutos
+        const code = Math.floor(100000 + Math.random() * 900000).toString(); 
+        const expires_at = new Date(Date.now() + 5 * 60 * 1000); 
 
         await pool.query(
             'INSERT INTO password_reset_codes (usuario_id, code, expires_at) VALUES ($1, $2, $3)',
@@ -30,7 +30,7 @@ const solicitarCodigo = async (req, res) => {
             from: process.env.EMAIL_USER,
             to: email,
             subject: 'Código de recuperación de contraseña',
-            text: `Tu código de recuperación es: ${code}. Expira en 10 minutos.`
+            text: `Tu código de recuperación es: ${code}. Expira en 5 minutos.`
         });
 
         res.json({ message: 'Código enviado al correo' });

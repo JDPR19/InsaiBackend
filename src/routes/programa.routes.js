@@ -7,6 +7,7 @@ const {
     getTiposPrograma,
     getAllPlagas,
     getAllEmpleados,
+    getAllCultivos,
     createPrograma,
     updatePrograma,
     deletePrograma
@@ -30,7 +31,12 @@ router
 
 router
     .route('/empleados/all')
-    .get(verificarToken, checkPermiso('empleados', 'ver'), getAllEmpleados)
+    .get(verificarToken, checkPermiso('empleados', 'ver'), getAllEmpleados);
+
+router
+    .route('/cultivos/all')
+    .get(verificarToken, checkPermiso('cultivo', 'ver'), getAllCultivos);
+
 router
     .route('/:id')
     .get(verificarToken, checkPermiso('programa', 'ver'), getPrograma)

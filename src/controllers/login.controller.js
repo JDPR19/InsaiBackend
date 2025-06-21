@@ -21,14 +21,14 @@ const loginUsuario = async (req, res, next) => {
 
         const user = result.rows[0];
 
-        // Comparar la contraseña ingresada con la almacenada
+        
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
             return res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
         }
 
-        // Generar un token JWT
+        
         const token = jwt.sign(
             {
                 id: user.id,
@@ -37,7 +37,7 @@ const loginUsuario = async (req, res, next) => {
                 permisos: user.permisos 
             },
             process.env.JWT_SECRET || 'secret',
-            { expiresIn: '5h' }
+            { expiresIn: '3h' }
         );
         // Login exitoso
         return res.json({

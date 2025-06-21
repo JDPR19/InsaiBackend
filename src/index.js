@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const morgan = require('morgan');
 const cors = require('cors');
 const empleadoRoutes = require('./routes/empleado.routes');
@@ -28,6 +29,8 @@ const plagas = require('./routes/plaga.routes');
 const cultivo = require('./routes/cultivo.routes');
 const programa = require('./routes/programa.routes');
 const productor = require('./routes/productor.routes');
+const propiedad = require('./routes/propiedad.routes');
+const inspecciones_est = require('./routes/inspeccion_est.routes');
 
 
 
@@ -41,6 +44,9 @@ app.use(morgan('dev'));
 
 
 // base para las rutas
+app.use('/uploads/inspeccion_est', express.static(path.join(__dirname, '../uploads/inspeccion_est')));
+app.use('/inspecciones_est', inspecciones_est);
+app.use('/propiedad', propiedad);
 app.use('/productor', productor);
 app.use('/programa', programa);
 app.use('/cultivo', cultivo);
