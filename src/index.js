@@ -31,6 +31,8 @@ const programa = require('./routes/programa.routes');
 const productor = require('./routes/productor.routes');
 const propiedad = require('./routes/propiedad.routes');
 const inspecciones_est = require('./routes/inspeccion_est.routes');
+const solicitud = require('./routes/solicitud.routes');
+const planificacion = require('./routes/planificacion.routes');
 
 
 
@@ -44,6 +46,8 @@ app.use(morgan('dev'));
 
 
 // base para las rutas
+app.use('/planificacion', planificacion);
+app.use('/solicitud', solicitud);
 app.use('/uploads/inspeccion_est', express.static(path.join(__dirname, '../uploads/inspeccion_est')));
 app.use('/inspecciones_est', inspecciones_est);
 app.use('/propiedad', propiedad);
