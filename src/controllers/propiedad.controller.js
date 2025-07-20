@@ -92,6 +92,42 @@ const getPropiedad = async (req, res, next) => {
     }
 };
 
+const getProductoresConPropiedades = async (req, res, next) => {
+    try {
+        const result = await pool.query(`
+            SELECT 
+                prod.id AS productor_id,
+                prod.codigo AS productor_codigo,
+                prod.nombre AS productor_nombre,
+                prod.apellido AS productor_apellido,
+                prod.cedula AS productor_cedula,
+                prod.codigo AS productor_codigo,
+                p.id AS propiedad_id,
+                p.nombre AS propiedad_nombre,
+                p.rif AS propiedad_rif,
+                p.ubicación AS propiedad_ubicacion,
+                p.hectareas AS propiedad_hectareas,
+                tp.nombre AS tipo_propiedad,
+                s.nombre AS sector,
+                par.nombre AS parroquia,
+                mun.nombre AS municipio,
+                edo.nombre AS estado
+            FROM productor prod
+            INNER JOIN propiedad p ON p.productor_id = prod.id
+            INNER JOIN tipo_propiedad tp ON p.tipo_propiedad_id = tp.id
+            INNER JOIN sector s ON p.sector_id = s.id
+            INNER JOIN parroquia par ON s.parroquia_id = par.id
+            INNER JOIN municipio mun ON par.municipio_id = mun.id
+            INNER JOIN estado edo ON mun.estado_id = edo.id
+            ORDER BY prod.id DESC, p.id DESC
+        `);
+
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Error obteniendo productores con propiedades:', error);
+        next(error);
+    }
+};
 
 const createPropiedad = async (req, res, next) => {
     const { rif, nombre, c_cultivo, hectareas, sitios_asociados, ubicación, tipo_propiedad_id, sector_id, productor_id, cultivos_ids, posee_certificado } = req.body;
@@ -283,6 +319,7 @@ const getAllProductores = async (req, res, next) => {
 module.exports = {
     getAllPropiedades,
     getPropiedad,
+    getProductoresConPropiedades,
     createPropiedad,
     updatePropiedad,
     deletePropiedad,

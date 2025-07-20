@@ -22,19 +22,19 @@ router
 
 router
     .route('/tipo_solicitud/all')
-    .get(verificarToken,checkPermiso('tipo_solicitud','ver'), getAllTipoSolicitudes);
+    .get(verificarToken,checkPermiso('solicitud','ver'), getAllTipoSolicitudes);
 
 router
     .route('/tipo_permiso/all')
-    .get(verificarToken,checkPermiso('tipo_permiso','ver'), getAllTipoPermisos);
+    .get(verificarToken,checkPermiso('solicitud','ver'), getAllTipoPermisos);
 
 router
     .route('/usuarios/all')
-    .get(verificarToken,checkPermiso('usuarios','ver'), getAllUsuarios);
+    .get(verificarToken,checkPermiso('solicitud','ver'), getAllUsuarios);
 
 router
     .route('/propiedad/all')
-    .get(verificarToken,checkPermiso('propiedad','ver'), getAllPropiedades);
+    .get(verificarToken,checkPermiso('solicitud','ver'), getAllPropiedades);
 
 router
     .route('/:id')

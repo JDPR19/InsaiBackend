@@ -23,23 +23,23 @@ router
 
 router
     .route('/tipos/all')
-    .get(verificarToken, checkPermiso('tipo_laboratorio', 'ver'), getTiposLaboratorio);
+    .get(verificarToken, checkPermiso('laboratorio', 'ver'), getTiposLaboratorio);
 
 router
     .route('/estados/all')
-    .get(verificarToken, checkPermiso('estado', 'ver'), getEstados);
+    .get(verificarToken, checkPermiso('laboratorio', 'ver'), getEstados);
 
 router
     .route('/municipios/all')
-    .get(verificarToken, checkPermiso('municipio', 'ver'), getMunicipios);
+    .get(verificarToken, checkPermiso('laboratorio', 'ver'), getMunicipios);
 
 router
     .route('/parroquias/all')
-    .get(verificarToken, checkPermiso('parroquia', 'ver'), getParroquias);
+    .get(verificarToken, checkPermiso('laboratorio', 'ver'), getParroquias);
 
 router
     .route('/sectores/all')
-    .get(verificarToken, checkPermiso('sector', 'ver'), getSectores);
+    .get(verificarToken, checkPermiso('laboratorio', 'ver'), getSectores);
 
 router
     .route('/:id')

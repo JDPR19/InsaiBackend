@@ -19,7 +19,7 @@ router
 
 router
     .route('/tipos/all')
-    .get(verificarToken, checkPermiso('tipo_cultivo', 'ver'), getTiposCultivo);
+    .get(verificarToken, checkPermiso('cultivo', 'ver'), getTiposCultivo);
 
 router
     .route('/:id')

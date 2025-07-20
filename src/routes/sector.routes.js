@@ -21,15 +21,15 @@ router
 
 router
     .route('/estados/all')
-    .get(verificarToken, checkPermiso('estado', 'ver'), getEstados);
+    .get(verificarToken, checkPermiso('sector', 'ver'), getEstados);
 
     router
     .route('/municipios/all')
-    .get(verificarToken, checkPermiso('municipio', 'ver'), getMunicipios);
+    .get(verificarToken, checkPermiso('sector', 'ver'), getMunicipios);
 
     router
     .route('/parroquias/all')
-    .get(verificarToken, checkPermiso('parroquia', 'ver'), getParroquias);
+    .get(verificarToken, checkPermiso('sector', 'ver'), getParroquias);
 
 router
     .route('/:id')

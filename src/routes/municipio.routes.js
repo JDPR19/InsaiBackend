@@ -19,7 +19,7 @@ router
 
 router
     .route('/estados/all')
-    .get(verificarToken, checkPermiso('estado', 'ver'), getEstados);
+    .get(verificarToken, checkPermiso('municipio', 'ver'), getEstados);
 
 router
     .route('/:id')

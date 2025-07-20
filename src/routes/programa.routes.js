@@ -23,19 +23,19 @@ router
 
 router
     .route('/tipos/all')
-    .get(verificarToken, checkPermiso('tipo_programa', 'ver'), getTiposPrograma);
+    .get(verificarToken, checkPermiso('programa', 'ver'), getTiposPrograma);
 
 router
     .route('/plagas/all')
-    .get(verificarToken, checkPermiso('plaga', 'ver'), getAllPlagas);
+    .get(verificarToken, checkPermiso('programa', 'ver'), getAllPlagas);
 
 router
     .route('/empleados/all')
-    .get(verificarToken, checkPermiso('empleados', 'ver'), getAllEmpleados);
+    .get(verificarToken, checkPermiso('programa', 'ver'), getAllEmpleados);
 
 router
     .route('/cultivos/all')
-    .get(verificarToken, checkPermiso('cultivo', 'ver'), getAllCultivos);
+    .get(verificarToken, checkPermiso('programa', 'ver'), getAllCultivos);
 
 router
     .route('/:id')

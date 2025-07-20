@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 
-const getAllInspeccionEst = async (req, res, next) => {
+const getAllInspecciones = async (req, res, next) => {
     try {
         const result = await pool.query(`
             SELECT ie.*, tif.nombre AS tipo_inspeccion_nombre, p.nombre AS propiedad_nombre,
@@ -53,7 +53,7 @@ const getAllInspeccionEst = async (req, res, next) => {
 };
 
 
-const getInspeccionEstById = async (req, res, next) => {
+const getInspeccionesById = async (req, res, next) => {
     try {
         const { id } = req.params;
         
@@ -116,7 +116,7 @@ const getInspeccionEstById = async (req, res, next) => {
 };
 
 
-const createInspeccionEst = async (req, res, next) => {
+const createInspecciones = async (req, res, next) => {
     const {
         n_control, codigo_inspeccion, area, fecha_notificacion, fecha_inspeccion, hora_inspeccion,
         responsable_e, cedula_res, tlf, norte, este, zona, correo,
@@ -208,7 +208,7 @@ const createInspeccionEst = async (req, res, next) => {
 };
 
 
-const updateInspeccionEst = async (req, res, next) => {
+const updateInspecciones = async (req, res, next) => {
     const client = await pool.connect();
     try {
         const { id } = req.params;
@@ -344,7 +344,7 @@ const updateInspeccionEst = async (req, res, next) => {
 };
 
 
-const deleteInspeccionEst = async (req, res, next) => {
+const deleteInspecciones = async (req, res, next) => {
     const { id } = req.params;
     const client = await pool.connect();
     try {
@@ -449,11 +449,11 @@ const getEstados = async (req, res, next) => {
 };
 
 module.exports = {
-    getAllInspeccionEst,
-    getInspeccionEstById,
-    createInspeccionEst,
-    updateInspeccionEst,
-    deleteInspeccionEst,
+    getAllInspecciones,
+    getInspeccionesById,
+    createInspecciones,
+    updateInspecciones,
+    deleteInspecciones,
     getAllEmpleados,
     getAllImagenes,
     getAllProgramas,

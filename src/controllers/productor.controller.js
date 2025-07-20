@@ -13,11 +13,8 @@ const getAllProductores = async (req, res, next) => {
                 productor.nombre,
                 productor.apellido,
                 productor.contacto,
-                productor.tipo_productor_id,
-                tipo_productor.nombre AS tipo_productor_nombre,
                 productor.email
             FROM productor
-            LEFT JOIN tipo_productor ON productor.tipo_productor_id = tipo_productor.id
             ORDER BY productor.id ASC
         `);
         return res.json(result.rows);

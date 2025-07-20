@@ -4,6 +4,7 @@ const checkPermiso = require('../checkPermisos');
 const {
     getAllPropiedades,
     getPropiedad,
+    getProductoresConPropiedades,
     createPropiedad,
     updatePropiedad,
     deletePropiedad,
@@ -24,32 +25,36 @@ router
     .post(verificarToken, checkPermiso('propiedad', 'crear'), createPropiedad);
 
 router
+    .route('/asociadas')
+    .get(verificarToken, checkPermiso('propiedad', 'ver'), getProductoresConPropiedades);
+
+router
     .route('/cultivos/all')
-    .get(verificarToken, checkPermiso('cultivo', 'ver'), getAllCultivos);
+    .get(verificarToken, checkPermiso('propiedad', 'ver'), getAllCultivos);
 
 router
     .route('/tipos/all')
-    .get(verificarToken, checkPermiso('tipo_propiedad', 'ver'), getAllTipoPropiedad);
+    .get(verificarToken, checkPermiso('propiedad', 'ver'), getAllTipoPropiedad);
 
 router
     .route('/sectores/all')
-    .get(verificarToken, checkPermiso('sector', 'ver'), getAllSectores);
+    .get(verificarToken, checkPermiso('propiedad', 'ver'), getAllSectores);
 
 router
     .route('/parroquias/all')
-    .get(verificarToken, checkPermiso('parroquia', 'ver'), getAllParroquias);
+    .get(verificarToken, checkPermiso('propiedad', 'ver'), getAllParroquias);
 
 router
     .route('/municipios/all')
-    .get(verificarToken, checkPermiso('municipio', 'ver'), getAllMunicipios);
+    .get(verificarToken, checkPermiso('propiedad', 'ver'), getAllMunicipios);
 
 router
     .route('/estados/all')
-    .get(verificarToken, checkPermiso('estado', 'ver'), getAllEstados);
+    .get(verificarToken, checkPermiso('propiedad', 'ver'), getAllEstados);
 
 router
     .route('/productores/all')
-    .get(verificarToken, checkPermiso('productor', 'ver'), getAllProductores);
+    .get(verificarToken, checkPermiso('propiedad', 'ver'), getAllProductores);
 
 router
     .route('/:id')

@@ -20,11 +20,11 @@ router
 
 router
     .route('/estados/all')
-    .get(verificarToken, checkPermiso('estado','ver'), getEstados);
+    .get(verificarToken, checkPermiso('parroquia','ver'), getEstados);
 
 router
     .route('/municipios/all')
-    .get(verificarToken, checkPermiso('municipio','ver'), getMunicipios);
+    .get(verificarToken, checkPermiso('parroquia','ver'), getMunicipios);
 
 router
     .route('/:id')

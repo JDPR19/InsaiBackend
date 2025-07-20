@@ -19,7 +19,7 @@ router
 
 router
     .route('/tipos/all')
-    .get(verificarToken, checkPermiso('tipo_plaga', 'ver'), getTiposPlagaFito);
+    .get(verificarToken, checkPermiso('plaga', 'ver'), getTiposPlagaFito);
 
 router
     .route('/:id')
