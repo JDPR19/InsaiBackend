@@ -6,7 +6,8 @@ const {
     getPlanificacion,
     createPlanificacion,
     updatePlanificacion,
-    deletePlanificacion
+    deletePlanificacion,
+    getAllEmpleados
 } = require('../controllers/planificacion.controller');
 
 const router = Router();
@@ -15,6 +16,10 @@ router
     .route('/')
     .get(verificarToken, checkPermiso('planificacion', 'ver'), getAllPlanificaciones)
     .post(verificarToken, checkPermiso('planificacion', 'crear'), createPlanificacion);
+
+router
+    .route('/empleados')
+    .get(verificarToken, getAllEmpleados);
 
 router
     .route('/:id')

@@ -32,7 +32,7 @@ const propiedad = require('./routes/propiedad.routes');
 const inspecciones = require('./routes/inspecciones.routes');
 const solicitud = require('./routes/solicitud.routes');
 const planificacion = require('./routes/planificacion.routes');
-
+const notificacionRoutes = require('./routes/notificacion.routes');
 
 
 const app = express();
@@ -45,6 +45,7 @@ app.use(morgan('dev'));
 
 
 // base para las rutas
+app.use('/notificaciones', notificacionRoutes);
 app.use('/planificacion', planificacion);
 app.use('/solicitud', solicitud);
 app.use('/uploads/inspeccion_est', express.static(path.join(__dirname, '../uploads/inspeccion_est')));

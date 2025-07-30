@@ -16,7 +16,7 @@ const loginUsuario = async (req, res, next) => {
         );
 
         if (result.rows.length === 0) {
-            return res.status(401).json({ message: 'Usuario o contraseña incorrectos o Usuario no Existe' });
+            return res.status(401).json({ message: 'Usuario no Existe' });
         }
 
         const user = result.rows[0];

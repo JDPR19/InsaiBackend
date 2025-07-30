@@ -4,7 +4,6 @@ const checkPermiso = require('../checkPermisos');
 const {
     getAllSolicitudes,
     getAllPropiedades,
-    getAllTipoPermisos,
     getAllUsuarios,
     getAllTipoSolicitudes,
     getSolicitud,
@@ -24,9 +23,6 @@ router
     .route('/tipo_solicitud/all')
     .get(verificarToken,checkPermiso('solicitud','ver'), getAllTipoSolicitudes);
 
-router
-    .route('/tipo_permiso/all')
-    .get(verificarToken,checkPermiso('solicitud','ver'), getAllTipoPermisos);
 
 router
     .route('/usuarios/all')
