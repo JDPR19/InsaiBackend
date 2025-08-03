@@ -95,9 +95,9 @@ const createPlanificacion = async (req, res, next) => {
         const fechaProg = fecha_programada && fecha_programada !== '' ? fecha_programada : null;
         await client.query('BEGIN');
         const result = await client.query(
-            `INSERT INTO planificacion (solicitud_id, fecha_programada, estado)
-             VALUES ($1, $2, $3) RETURNING *`,
-            [solicitud_id, fechaProg, estado || 'pendiente']
+            `INSERT INTO planificacion (solicitud_id, fecha_programada, estado, nombre)
+            VALUES ($1, $2, $3, $4) RETURNING *`,
+            [solicitud_id, fechaProg, estado || 'pendiente', req.body.nombre || null]
         );
         const planificacionId = result.rows[0].id;
 
@@ -147,8 +147,8 @@ const updatePlanificacion = async (req, res, next) => {
         await client.query('BEGIN');
         const oldPlan = await client.query('SELECT * FROM planificacion WHERE id = $1', [id]);
         const result = await client.query(
-            `UPDATE planificacion SET fecha_programada = $1, estado = $2, updated_at = NOW() WHERE id = $3 RETURNING *`,
-            [fechaProg, estado, id]
+            `UPDATE planificacion SET fecha_programada = $1, estado = $2, nombre = $3, updated_at = NOW() WHERE id = $4 RETURNING *`,
+            [fechaProg, estado, req.body.nombre || null, id]
         );
 
         // Actualizar empleados asociados

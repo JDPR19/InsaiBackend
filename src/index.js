@@ -33,7 +33,7 @@ const inspecciones = require('./routes/inspecciones.routes');
 const solicitud = require('./routes/solicitud.routes');
 const planificacion = require('./routes/planificacion.routes');
 const notificacionRoutes = require('./routes/notificacion.routes');
-
+const seguimiento = require('./routes/seguimiento.routes');
 
 const app = express();
 app.use(express.json());
@@ -45,6 +45,7 @@ app.use(morgan('dev'));
 
 
 // base para las rutas
+app.use('/seguimiento', seguimiento);
 app.use('/notificaciones', notificacionRoutes);
 app.use('/planificacion', planificacion);
 app.use('/solicitud', solicitud);

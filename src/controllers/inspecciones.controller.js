@@ -3,41 +3,23 @@ const { registrarBitacora } = require('../registerBitacora');
 const fs = require('fs');
 const path = require('path');
 
-
+// Listar todas las inspecciones
 const getAllInspecciones = async (req, res, next) => {
     try {
         const result = await pool.query(`
-            SELECT ie.*, tif.nombre AS tipo_inspeccion_nombre, p.nombre AS propiedad_nombre,
+            SELECT ie.*, tif.nombre AS tipo_inspeccion_nombre, p.nombre AS planificacion_nombre,
             TO_CHAR(ie.fecha_inspeccion, 'YYYY-MM-DD') AS fecha_inspeccion, 
             TO_CHAR(ie.fecha_notificacion, 'YYYY-MM-DD') AS fecha_notificacion, 
             TO_CHAR(ie.fecha_proxima_inspeccion, 'YYYY-MM-DD') AS fecha_proxima_inspeccion
             FROM inspeccion_est ie
             LEFT JOIN tipo_inspeccion_fito tif ON ie.tipo_inspeccion_fito_id = tif.id
-            LEFT JOIN propiedad p ON ie.propiedad_id = p.id
+            LEFT JOIN planificacion p ON ie.planificacion_id = p.id
             ORDER BY ie.id DESC
         `);
 
         const inspecciones = result.rows;
 
         for (const inspeccion of inspecciones) {
-            // Empleados
-            const empleadosRes = await pool.query(`
-                SELECT e.id, e.nombre, e.apellido, e.cedula
-                FROM inspeccion_empleado iee
-                JOIN empleados e ON iee.empleado_id = e.id
-                WHERE iee.inspeccion_est_id = $1
-            `, [inspeccion.id]);
-            inspeccion.empleados = empleadosRes.rows;
-
-            // Programas
-            const programasRes = await pool.query(`
-                SELECT p.id, p.nombre
-                FROM inspeccion_programa ip
-                JOIN programa_fito p ON ip.programa_fito_id = p.id
-                WHERE ip.inspeccion_est_id = $1
-            `, [inspeccion.id]);
-            inspeccion.programas = programasRes.rows;
-
             // Imágenes
             const imagenesRes = await pool.query(`
                 SELECT id, imagen FROM inspeccion_imagen WHERE inspeccion_est_id = $1
@@ -52,23 +34,21 @@ const getAllInspecciones = async (req, res, next) => {
     }
 };
 
-
+// Obtener inspección por ID
 const getInspeccionesById = async (req, res, next) => {
     try {
         const { id } = req.params;
-        
         const result = await pool.query(`
             SELECT ie.*, 
                 tif.nombre AS tipo_inspeccion_nombre, 
-                p.nombre AS propiedad_nombre, 
+                p.nombre AS planificacion_nombre, 
                 TO_CHAR(ie.fecha_notificacion, 'YYYY-MM-DD') AS fecha_notificacion, 
                 TO_CHAR(ie.fecha_inspeccion, 'YYYY-MM-DD') AS fecha_inspeccion, 
                 TO_CHAR(ie.fecha_proxima_inspeccion, 'YYYY-MM-DD') AS fecha_proxima_inspeccion
             FROM inspeccion_est ie
             LEFT JOIN tipo_inspeccion_fito tif ON ie.tipo_inspeccion_fito_id = tif.id
-            LEFT JOIN propiedad p ON ie.propiedad_id = p.id
+            LEFT JOIN planificacion p ON ie.planificacion_id = p.id
             WHERE ie.id = $1;
-
         `, [id]);
 
         if (result.rows.length === 0) {
@@ -77,36 +57,10 @@ const getInspeccionesById = async (req, res, next) => {
 
         const inspeccion = result.rows[0];
 
-
-        const empleadosRes = await pool.query(`
-            SELECT e.id, e.nombre, e.apellido, e.cedula
-            FROM inspeccion_empleado iee
-            JOIN empleados e ON iee.empleado_id = e.id
-            WHERE iee.inspeccion_est_id = $1
-        `, [inspeccion.id]);
-        inspeccion.empleados = empleadosRes.rows;
-
-
-        const programasRes = await pool.query(`
-            SELECT p.id, p.nombre
-            FROM inspeccion_programa ip
-            JOIN programa_fito p ON ip.programa_fito_id = p.id
-            WHERE ip.inspeccion_est_id = $1
-        `, [inspeccion.id]);
-        inspeccion.programas = programasRes.rows;
-
-
         const imagenesRes = await pool.query(`
             SELECT id, imagen FROM inspeccion_imagen WHERE inspeccion_est_id = $1
         `, [inspeccion.id]);
         inspeccion.imagenes = imagenesRes.rows;
-
-        inspeccion.fecha_notificacion = inspeccion.fecha_notificacion || null;
-        inspeccion.fecha_inspeccion = inspeccion.fecha_inspeccion || null;
-        inspeccion.fecha_proxima_inspeccion = inspeccion.fecha_proxima_inspeccion || null;
-        inspeccion.empleados = empleadosRes.rows.length ? empleadosRes.rows : [];
-        inspeccion.programas = programasRes.rows.length ? programasRes.rows : [];
-        inspeccion.imagenes = imagenesRes.rows.length ? imagenesRes.rows : [];
 
         res.json(inspeccion);
     } catch (error) {
@@ -115,30 +69,27 @@ const getInspeccionesById = async (req, res, next) => {
     }
 };
 
-
+// Crear inspección (con imágenes)
 const createInspecciones = async (req, res, next) => {
     const {
         n_control, codigo_inspeccion, area, fecha_notificacion, fecha_inspeccion, hora_inspeccion,
         responsable_e, cedula_res, tlf, norte, este, zona, correo,
-        finalidad1 = null, finalidad2 = null, finalidad3 = null, finalidad4 = null, finalidad5 = null, finalidad6 = null, // ← Agregado aquí
+        finalidad1 = null, finalidad2 = null, finalidad3 = null, finalidad4 = null, finalidad5 = null, finalidad6 = null,
         aspectos, ordenamientos, fecha_proxima_inspeccion, estado,
-        tipo_inspeccion_fito_id, propiedad_id, 
-        empleados_ids = [], programas_ids = [], aplica_programa 
+        tipo_inspeccion_fito_id, planificacion_id
     } = req.body;
-    console.log('Valores recibidos:', req.body);
 
-    
+    // Manejo de decimales/float
+    const norteRaw = Array.isArray(norte) ? norte[0] : norte;
+    const esteRaw = Array.isArray(este) ? este[0] : este;
+    const zonaRaw = Array.isArray(zona) ? zona[0] : zona;
+
+    const norteVal = norteRaw && typeof norteRaw === 'string' ? parseFloat(norteRaw.replace(',', '.')) : (norteRaw ? parseFloat(norteRaw) : null);
+    const esteVal = esteRaw && typeof esteRaw === 'string' ? parseFloat(esteRaw.replace(',', '.')) : (esteRaw ? parseFloat(esteRaw) : null);
+    const zonaVal = zonaRaw && typeof zonaRaw === 'string' ? parseFloat(zonaRaw.replace(',', '.')) : (zonaRaw ? parseFloat(zonaRaw) : null);
+
     const client = await pool.connect();
     try {
-        const norteRaw = Array.isArray(req.body.norte) ? req.body.norte[0] : req.body.norte;
-        const esteRaw = Array.isArray(req.body.este) ? req.body.este[0] : req.body.este;
-        const norte = norteRaw && typeof norteRaw === 'string' ? parseFloat(norteRaw.replace(',', '.')) : (norteRaw ? parseFloat(norteRaw) : null);
-        const este = esteRaw && typeof esteRaw === 'string' ? parseFloat(esteRaw.replace(',', '.')) : (esteRaw ? parseFloat(esteRaw) : null);
-        const fecha_notificacion = req.body.fecha_notificacion && req.body.fecha_notificacion !== '' ? req.body.fecha_notificacion : null;
-        const fecha_inspeccion = req.body.fecha_inspeccion && req.body.fecha_inspeccion !== '' ? req.body.fecha_inspeccion : null;
-        const fecha_proxima_inspeccion = req.body.fecha_proxima_inspeccion && req.body.fecha_proxima_inspeccion !== '' ? req.body.fecha_proxima_inspeccion : null;
-
-
         await client.query('BEGIN');
         const result = await client.query(`
             INSERT INTO inspeccion_est (
@@ -146,38 +97,20 @@ const createInspecciones = async (req, res, next) => {
                 responsable_e, cedula_res, tlf, norte, este, zona, correo,
                 finalidad1, finalidad2, finalidad3, finalidad4, finalidad5,
                 finalidad6, aspectos, ordenamientos, fecha_proxima_inspeccion, estado,
-                tipo_inspeccion_fito_id, propiedad_id, aplica_programa
+                tipo_inspeccion_fito_id, planificacion_id
             ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25
             ) RETURNING *
         `, [
-                n_control, codigo_inspeccion, area, fecha_notificacion, fecha_inspeccion, hora_inspeccion,
-            responsable_e, cedula_res, tlf, norte, este, zona, correo,
-            finalidad1, finalidad2, finalidad3, finalidad4, finalidad5, finalidad6, 
+            n_control, codigo_inspeccion, area, fecha_notificacion, fecha_inspeccion, hora_inspeccion,
+            responsable_e, cedula_res, tlf, norteVal, esteVal, zonaVal, correo,
+            finalidad1, finalidad2, finalidad3, finalidad4, finalidad5, finalidad6,
             aspectos, ordenamientos, fecha_proxima_inspeccion, estado,
-            tipo_inspeccion_fito_id, propiedad_id, aplica_programa
+            tipo_inspeccion_fito_id, planificacion_id
         ]);
         const inspeccionEstId = result.rows[0].id;
-        
-        let empleados_ids = req.body.empleados_ids;
-        let programas_ids = req.body.programas_ids;
-        if (!Array.isArray(empleados_ids)) empleados_ids = empleados_ids ? [empleados_ids] : [];
-        if (!Array.isArray(programas_ids)) programas_ids = programas_ids ? [programas_ids] : [];
-        // Ahora siempre son arrays, aunque solo haya uno
-        for (const empleado_id of empleados_ids) {
-            await client.query(
-                `INSERT INTO inspeccion_empleado (inspeccion_est_id, empleado_id) VALUES ($1, $2)`,
-                [inspeccionEstId || id, empleado_id]
-            );
-        }
-        for (const programa_id of programas_ids) {
-            await client.query(
-                `INSERT INTO inspeccion_programa (inspeccion_est_id, programa_fito_id) VALUES ($1, $2)`,
-                [inspeccionEstId || id, programa_id]
-            );
-        }
 
-    
+        // Guardar imágenes
         if (req.files && req.files.length > 0) {
             for (const file of req.files) {
                 await client.query(
@@ -207,31 +140,26 @@ const createInspecciones = async (req, res, next) => {
     }
 };
 
-
+// Actualizar inspección (con imágenes)
 const updateInspecciones = async (req, res, next) => {
     const client = await pool.connect();
     try {
         const { id } = req.params;
-
         const {
             n_control, codigo_inspeccion, area, fecha_notificacion, fecha_inspeccion, hora_inspeccion,
             responsable_e, cedula_res, correo, tlf, norte, este, zona, aspectos, finalidad1, finalidad2,
             finalidad3, finalidad4, finalidad5, finalidad6, ordenamientos, fecha_proxima_inspeccion,
-            estado, aplica_programa, tipo_inspeccion_fito_id, propiedad_id, imagenesAEliminar = []
+            estado, tipo_inspeccion_fito_id, planificacion_id, imagenesAEliminar = []
         } = req.body;
 
-        let empleados_ids = req.body.empleados_ids;
-        let programas_ids = req.body.programas_ids;
-        if (!Array.isArray(empleados_ids)) empleados_ids = empleados_ids ? [empleados_ids] : [];
-        if (!Array.isArray(programas_ids)) programas_ids = programas_ids ? [programas_ids] : [];
-
+        // Manejo de decimales/float
         const norteRaw = Array.isArray(norte) ? norte[0] : norte;
         const esteRaw = Array.isArray(este) ? este[0] : este;
         const zonaRaw = Array.isArray(zona) ? zona[0] : zona;
 
         const norteVal = norteRaw && typeof norteRaw === 'string' ? parseFloat(norteRaw.replace(',', '.')) : (norteRaw ? parseFloat(norteRaw) : null);
         const esteVal = esteRaw && typeof esteRaw === 'string' ? parseFloat(esteRaw.replace(',', '.')) : (esteRaw ? parseFloat(esteRaw) : null);
-        const zonaVal = zonaRaw && typeof zonaRaw === 'string' ? zonaRaw : (zonaRaw ? zonaRaw : null);
+        const zonaVal = zonaRaw && typeof zonaRaw === 'string' ? parseFloat(zonaRaw.replace(',', '.')) : (zonaRaw ? parseFloat(zonaRaw) : null);
 
         await client.query('BEGIN');
 
@@ -260,43 +188,24 @@ const updateInspecciones = async (req, res, next) => {
                 ordenamientos = $21,
                 fecha_proxima_inspeccion = $22,
                 estado = $23,
-                aplica_programa = $24,
-                tipo_inspeccion_fito_id = $25,
-                propiedad_id = $26
-            WHERE id = $27`,
+                tipo_inspeccion_fito_id = $24,
+                planificacion_id = $25
+            WHERE id = $26`,
             [
                 n_control, codigo_inspeccion, area, fecha_notificacion, fecha_inspeccion, hora_inspeccion,
                 responsable_e, cedula_res, correo, tlf, norteVal, esteVal, zonaVal, aspectos, finalidad1, finalidad2,
                 finalidad3, finalidad4, finalidad5, finalidad6, ordenamientos, fecha_proxima_inspeccion,
-                estado, aplica_programa, tipo_inspeccion_fito_id, propiedad_id, id
+                estado, tipo_inspeccion_fito_id, planificacion_id, id
             ]
         );
 
-        await client.query(`DELETE FROM inspeccion_empleado WHERE inspeccion_est_id = $1`, [id]);
-        await client.query(`DELETE FROM inspeccion_programa WHERE inspeccion_est_id = $1`, [id]);
-
-        for (const empleado_id of empleados_ids) {
-            await client.query(
-                `INSERT INTO inspeccion_empleado (inspeccion_est_id, empleado_id) VALUES ($1, $2)`,
-                [id, empleado_id]
-            );
-        }
-
-        for (const programa_id of programas_ids) {
-            await client.query(
-                `INSERT INTO inspeccion_programa (inspeccion_est_id, programa_fito_id) VALUES ($1, $2)`,
-                [id, programa_id]
-            );
-        }
-
+        // Eliminar imágenes seleccionadas
         if (imagenesAEliminar && imagenesAEliminar.length > 0) {
             for (const imgName of imagenesAEliminar) {
-                // Elimina archivo físico
                 const filePath = path.join(__dirname, '../../uploads/inspeccion_est', imgName);
                 if (fs.existsSync(filePath)) {
                     try { fs.unlinkSync(filePath); } catch (err) { console.error('No se pudo borrar:', filePath, err); }
                 }
-                // Elimina registro en BD
                 await client.query(
                     `DELETE FROM inspeccion_imagen WHERE inspeccion_est_id = $1 AND imagen = $2`,
                     [id, imgName]
@@ -304,26 +213,8 @@ const updateInspecciones = async (req, res, next) => {
             }
         }
 
-        
+        // Agregar nuevas imágenes
         if (req.files && req.files.length > 0) {
-            const oldImagesRes = await client.query(
-                `SELECT imagen FROM inspeccion_imagen WHERE inspeccion_est_id = $1`,
-                [id]
-            );
-
-            for (const row of oldImagesRes.rows) {
-                const filePath = path.join(__dirname, '../../uploads/inspeccion_est', row.imagen);
-                if (fs.existsSync(filePath)) {
-                    try {
-                        fs.unlinkSync(filePath);
-                    } catch (err) {
-                        console.error('No se pudo borrar:', filePath, err);
-                    }
-                }
-            }
-
-            await client.query(`DELETE FROM inspeccion_imagen WHERE inspeccion_est_id = $1`, [id]);
-            
             for (const file of req.files) {
                 await client.query(
                     `INSERT INTO inspeccion_imagen (inspeccion_est_id, imagen) VALUES ($1, $2)`,
@@ -343,14 +234,24 @@ const updateInspecciones = async (req, res, next) => {
     }
 };
 
-
+// Eliminar inspección (y sus imágenes)
 const deleteInspecciones = async (req, res, next) => {
     const { id } = req.params;
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
-        await client.query(`DELETE FROM inspeccion_empleado WHERE inspeccion_est_id = $1`, [id]);
-        await client.query(`DELETE FROM inspeccion_programa WHERE inspeccion_est_id = $1`, [id]);
+
+        // Eliminar imágenes físicas
+        const imagenesRes = await client.query(
+            `SELECT imagen FROM inspeccion_imagen WHERE inspeccion_est_id = $1`,
+            [id]
+        );
+        for (const row of imagenesRes.rows) {
+            const filePath = path.join(__dirname, '../../uploads/inspeccion_est', row.imagen);
+            if (fs.existsSync(filePath)) {
+                try { fs.unlinkSync(filePath); } catch (err) { console.error('No se pudo borrar:', filePath, err); }
+            }
+        }
         await client.query(`DELETE FROM inspeccion_imagen WHERE inspeccion_est_id = $1`, [id]);
         await client.query(`DELETE FROM inspeccion_est WHERE id = $1`, [id]);
 
@@ -374,29 +275,7 @@ const deleteInspecciones = async (req, res, next) => {
     }
 };
 
-
-const getAllEmpleados = async (req, res, next) => {
-    try {
-        const result = await pool.query('SELECT id, nombre, apellido FROM empleados ORDER BY nombre ASC');
-        res.json(result.rows);
-    } catch (error) {
-        console.error('Error obteniendo empleados:', error);
-        next(error);
-    }
-};
-
-
-const getAllProgramas = async (req, res, next) => {
-    try {
-        const result = await pool.query('SELECT id, nombre FROM programa_fito ORDER BY nombre ASC');
-        res.json(result.rows);
-    } catch (error) {
-        console.error('Error obteniendo programas:', error);
-        next(error);
-    }
-};
-
-
+// Obtener imágenes de una inspección
 const getAllImagenes = async (req, res, next) => {
     try {
         const { inspeccion_est_id } = req.params;
@@ -410,7 +289,7 @@ const getAllImagenes = async (req, res, next) => {
     }
 };
 
-
+// Listar tipos de inspección
 const getTiposInspeccion = async (req, res, next) => {
     try {
         const result = await pool.query('SELECT id, nombre FROM tipo_inspeccion_fito ORDER BY nombre ASC');
@@ -421,29 +300,18 @@ const getTiposInspeccion = async (req, res, next) => {
     }
 };
 
-
-const getPropiedades = async (req, res, next) => {
+// Listar planificaciones
+const getAllPlanificaciones = async (req, res, next) => {
     try {
-        const result = await pool.query('SELECT id, nombre FROM propiedad ORDER BY nombre ASC');
+        const result = await pool.query(`
+            SELECT p.*, s.descripcion AS solicitud_descripcion, s.estado AS solicitud_estado
+            FROM planificacion p
+            LEFT JOIN solicitud s ON p.solicitud_id = s.id
+            ORDER BY p.id DESC
+        `);
         res.json(result.rows);
     } catch (error) {
-        console.error('Error obteniendo propiedades:', error);
-        next(error);
-    }
-};
-
-
-const getEstados = async (req, res, next) => {
-    try {
-        const estados = [
-            { value: 'Pendiente', label: 'Pendiente' },
-            { value: 'En Proceso', label: 'En Proceso' },
-            { value: 'Aprobada', label: 'Aprobada' },
-            { value: 'Rechazada', label: 'Rechazada' }
-        ];
-        res.json(estados);
-    } catch (error) {
-        console.error('Error obteniendo estados:', error);
+        console.error('Error obteniendo planificaciones:', error);
         next(error);
     }
 };
@@ -454,10 +322,7 @@ module.exports = {
     createInspecciones,
     updateInspecciones,
     deleteInspecciones,
-    getAllEmpleados,
     getAllImagenes,
-    getAllProgramas,
     getTiposInspeccion,
-    getPropiedades,
-    getEstados
+    getAllPlanificaciones
 };
