@@ -39,12 +39,12 @@ const getProductor = async (req, res, next) => {
 };
 
 const createProductor = async (req, res, next) => {
-    const { codigo, cedula, nombre, apellido, contacto, tipo_productor_id, email } = req.body;
+    const { codigo, cedula, nombre, apellido, contacto, email } = req.body;
     try {
         const result = await pool.query(
-            `INSERT INTO productor (codigo, cedula, nombre, apellido, contacto, tipo_productor_id, email)
-             VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-            [codigo, cedula, nombre, apellido, contacto, tipo_productor_id, email]
+            `INSERT INTO productor (codigo, cedula, nombre, apellido, contacto, email)
+             VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+            [codigo, cedula, nombre, apellido, contacto, email]
         );
         await registrarBitacora({
             accion: 'REGISTRO',
@@ -67,9 +67,9 @@ const updateProductor = async (req, res, next) => {
         const { codigo, cedula, nombre, apellido, contacto, tipo_productor_id, email } = req.body;
         const oldProductor = await pool.query('SELECT * FROM productor WHERE id = $1', [id]);
         const result = await pool.query(
-            `UPDATE productor SET codigo = $1, cedula = $2, nombre = $3, apellido = $4, contacto = $5, tipo_productor_id = $6, email = $7
-             WHERE id = $8 RETURNING *`,
-            [codigo, cedula, nombre, apellido, contacto, tipo_productor_id, email, id]
+            `UPDATE productor SET codigo = $1, cedula = $2, nombre = $3, apellido = $4, contacto = $5, email = $6
+             WHERE id = $7 RETURNING *`,
+            [codigo, cedula, nombre, apellido, contacto, email, id]
         );
         if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Productor no encontrado' });

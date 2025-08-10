@@ -1,10 +1,10 @@
 const pool = require('../db');
 const { registrarBitacora } = require('../registerBitacora');
+const { crearYEmitirNotificacion } = require('../helpers/emitirNotificaciones');
 
-// Función para registrar notificaciones a empleados
-async function registrarNotificacionesEmpleados(client, empleados_ids, mensaje) {
+// Función para registrar notificaciones a empleados y emitirlas en tiempo real
+async function registrarNotificacionesEmpleados(req, client, empleados_ids, mensaje) {
     for (const empleado_id of empleados_ids) {
-        // Busca TODOS los usuarios activos relacionados al empleado
         const usuariosRes = await client.query(
             'SELECT id FROM usuarios WHERE empleado_id = $1 AND estado = TRUE', [empleado_id]
         );
@@ -13,10 +13,11 @@ async function registrarNotificacionesEmpleados(client, empleados_ids, mensaje) 
                 'INSERT INTO notificaciones (usuario_id, mensaje) VALUES ($1, $2)',
                 [usuario.id, mensaje]
             );
+            // Emitir la notificación en tiempo real
+            await crearYEmitirNotificacion(req, usuario.id, { mensaje });
         }
     }
 }
-
 
 const getAllPlanificaciones = async (req, res, next) => {
     try {
@@ -50,7 +51,6 @@ const getAllPlanificaciones = async (req, res, next) => {
     }
 };
 
-// Obtener una planificación por ID con empleados asociados
 const getPlanificacion = async (req, res, next) => {
     try {
         const { id } = req.params;
@@ -87,7 +87,6 @@ const getPlanificacion = async (req, res, next) => {
     }
 };
 
-// Crear planificación y sus empleados asociados
 const createPlanificacion = async (req, res, next) => {
     const { solicitud_id, fecha_programada, estado, empleados_ids } = req.body;
     const client = await pool.connect();
@@ -101,7 +100,7 @@ const createPlanificacion = async (req, res, next) => {
         );
         const planificacionId = result.rows[0].id;
 
-        // Registrar empleados asociados
+        // Registrar empleados asociados y emitir notificaciones en tiempo real
         if (Array.isArray(empleados_ids)) {
             for (const empleado_id of empleados_ids) {
                 await client.query(
@@ -109,8 +108,8 @@ const createPlanificacion = async (req, res, next) => {
                     [planificacionId, empleado_id]
                 );
             }
-            // Registrar notificaciones
             await registrarNotificacionesEmpleados(
+                req,
                 client,
                 empleados_ids,
                 `Has sido asignado a una nueva planificación para la solicitud #${solicitud_id}`
@@ -137,7 +136,6 @@ const createPlanificacion = async (req, res, next) => {
     }
 };
 
-// Actualizar planificación y sus empleados asociados
 const updatePlanificacion = async (req, res, next) => {
     const { id } = req.params;
     const { fecha_programada, estado, empleados_ids } = req.body;
@@ -151,7 +149,6 @@ const updatePlanificacion = async (req, res, next) => {
             [fechaProg, estado, req.body.nombre || null, id]
         );
 
-        // Actualizar empleados asociados
         await client.query(`DELETE FROM planificacion_empleado WHERE planificacion_id = $1`, [id]);
         if (Array.isArray(empleados_ids)) {
             for (const empleado_id of empleados_ids) {
@@ -160,8 +157,8 @@ const updatePlanificacion = async (req, res, next) => {
                     [id, empleado_id]
                 );
             }
-            // Registrar notificaciones
             await registrarNotificacionesEmpleados(
+                req,
                 client,
                 empleados_ids,
                 `Has sido asignado a una planificación actualizada para la solicitud #${oldPlan.rows[0].solicitud_id}`
@@ -188,7 +185,6 @@ const updatePlanificacion = async (req, res, next) => {
     }
 };
 
-// Eliminar planificación y sus empleados asociados
 const deletePlanificacion = async (req, res, next) => {
     const { id } = req.params;
     const client = await pool.connect();
@@ -220,7 +216,6 @@ const deletePlanificacion = async (req, res, next) => {
     }
 };
 
-// Obtener todos los empleados (para select en frontend)
 const getAllEmpleados = async (req, res, next) => {
     try {
         const result = await pool.query('SELECT id, nombre, apellido, cedula FROM empleados ORDER BY nombre ASC');

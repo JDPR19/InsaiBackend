@@ -1,6 +1,14 @@
 const pool = require('../db');
 
-// Obtener todos los programas asociados a una inspección
+const getAllProgramasFito = async (req, res, next) => {
+    try {
+        const result = await pool.query('SELECT id, nombre FROM programa_fito ORDER BY nombre ASC');
+        res.json(result.rows);
+    } catch (error) {
+        next(error);
+    }
+};
+
 const getProgramasByInspeccion = async (req, res, next) => {
     try {
         const { inspeccion_est_id } = req.params;
@@ -17,19 +25,12 @@ const getProgramasByInspeccion = async (req, res, next) => {
     }
 };
 
-const getAllProgramasFito = async (req, res, next) => {
-    try {
-        const result = await pool.query('SELECT id, nombre FROM programa_fito ORDER BY nombre ASC');
-        res.json(result.rows);
-    } catch (error) {
-        next(error);
-    }
-};
-
-// Asociar un programa a una inspección
 const addProgramaToInspeccion = async (req, res, next) => {
     try {
         const { inspeccion_est_id, programa_fito_id, observacion } = req.body;
+        if (!inspeccion_est_id || !programa_fito_id) {
+            return res.status(400).json({ error: 'Faltan datos requeridos' });
+        }
         const result = await pool.query(`
             INSERT INTO inspeccion_programa_fito (inspeccion_est_id, programa_fito_id, observacion)
             VALUES ($1, $2, $3)
@@ -41,7 +42,24 @@ const addProgramaToInspeccion = async (req, res, next) => {
     }
 };
 
-// Eliminar la asociación de un programa con una inspección
+const updateProgramaInInspeccion = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { observacion } = req.body;
+        // Solo permitimos editar la observación (no el programa ni la inspección)
+        const result = await pool.query(
+            `UPDATE inspeccion_programa_fito SET observacion = $1 WHERE id = $2 RETURNING *`,
+            [observacion, id]
+        );
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'No encontrado' });
+        }
+        res.json(result.rows[0]);
+    } catch (error) {
+        next(error);
+    }
+};
+
 const deleteProgramaFromInspeccion = async (req, res, next) => {
     try {
         const { id } = req.params;
@@ -56,5 +74,6 @@ module.exports = {
     getProgramasByInspeccion,
     getAllProgramasFito,
     addProgramaToInspeccion,
+    updateProgramaInInspeccion,
     deleteProgramaFromInspeccion
 };

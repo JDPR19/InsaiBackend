@@ -1,12 +1,14 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const pool = require('../db'); // Conexión a la base de datos
+const pool = require('../db');
+const { crearSesion, tieneSesionActiva, cerrarSesion } = require('./sesion.controller');
 
 const loginUsuario = async (req, res, next) => {
     const { username, password } = req.body;
+    const ip = req.ip;
+    const user_agent = req.headers['user-agent'];
 
     try {
-        // Buscar el usuario y su tipo de usuario
         const result = await pool.query(
             `SELECT u.*, t.nombre AS roles_nombre, t.permisos
             FROM usuarios u
@@ -20,15 +22,18 @@ const loginUsuario = async (req, res, next) => {
         }
 
         const user = result.rows[0];
-
-        
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
             return res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
         }
 
-        
+        // Verifica si ya tiene sesión activa
+        const sesionActiva = await tieneSesionActiva(user.id);
+        if (sesionActiva) {
+            return res.status(403).json({ message: 'El usuario ya tiene una sesión activa en otro dispositivo.' });
+        }
+
         const token = jwt.sign(
             {
                 id: user.id,
@@ -39,7 +44,10 @@ const loginUsuario = async (req, res, next) => {
             process.env.JWT_SECRET || 'secret',
             { expiresIn: '3h' }
         );
-        // Login exitoso
+
+        // Crea la sesión en la tabla
+        await crearSesion(user.id, token, ip, user_agent);
+
         return res.json({
             message: 'Login exitoso',
             token,
@@ -60,8 +68,16 @@ const loginUsuario = async (req, res, next) => {
     }
 };
 
-const logoutUsuario = (req, res) => {
-    return res.json({ message: 'Sesión cerrada exitosamente' });
+const logoutUsuario = async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (token) {
+            await cerrarSesion(token); 
+        }
+        return res.json({ message: 'Sesión cerrada exitosamente' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error cerrando sesión', error: error.message });
+    }
 };
 
 module.exports = { loginUsuario, logoutUsuario };

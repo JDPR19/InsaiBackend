@@ -2,6 +2,10 @@ const express = require('express');
 const path = require('path');
 const morgan = require('morgan');
 const cors = require('cors');
+const http = require('http');
+const { Server } = require('socket.io');
+
+// Rutas
 const empleadoRoutes = require('./routes/empleado.routes');
 const usuarioRoutes = require('./routes/usuario.routes');
 const loginRoutes = require('./routes/auth.routes');
@@ -42,9 +46,7 @@ app.use(express.json());
 app.use(cors());
 app.use(morgan('dev'));
 
-
-
-// base para las rutas
+// Rutas
 app.use('/seguimiento', seguimiento);
 app.use('/notificaciones', notificacionRoutes);
 app.use('/planificacion', planificacion);
@@ -79,13 +81,6 @@ app.use('/auth', loginRoutes);
 app.use('/recuperacion', recuperacionRoutes);
 app.use('/bitacora', bitacoraRoutes);
 
-
-
-//prueba de ruta
-// app.get('/cargo/test', (req, res) => {
-//     res.send('¡Ruta de prueba funcionando!');
-// });
-
 // Manejador de errores globales
 app.use((req, res, next) => {
     res.status(404).json({
@@ -94,14 +89,27 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-    console.error('Error capturado:', err.stack); // Log del error completo
+    console.error('Error capturado:', err.stack);
     res.status(err.status || 500).json({
         message: 'Ocurrió un error interno en el servidor',
-        error: process.env.NODE_ENV === 'development' ? err.message : 'Error interno', // Muestra más detalles en desarrollo
+        error: process.env.NODE_ENV === 'development' ? err.message : 'Error interno',
     });
 });
-// Escuchar en el puerto
+
+// --- Socket.io ---
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: '*' } });
+
+// Guardar el objeto io para usarlo en los controladores
+app.set('io', io);
+
+io.on('connection', (socket) => {
+    socket.on('join', (usuarioId) => {
+        socket.join(`usuario_${usuarioId}`);
+    });
+});
+
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en el puerto ${PORT}`);
+server.listen(PORT, () => {
+    console.log(`Servidor corriendo en el puerto ${PORT} (con socket.io)`);
 });

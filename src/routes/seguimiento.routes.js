@@ -5,25 +5,23 @@ const {
     getProgramasByInspeccion,
     getAllProgramasFito,
     addProgramaToInspeccion,
+    updateProgramaInInspeccion,
     deleteProgramaFromInspeccion
 } = require('../controllers/seguimiento.controller');
 
 const router = Router();
 
-// Obtener programas asociados a una inspección
-router
-    .route('/:inspeccion_est_id')
-    .get(verificarToken, checkPermiso('inspecciones', 'ver'), getProgramasByInspeccion);
 
-// Asociar un programa a una inspección
-router
-    .route('/')
-    .get(verificarToken, checkPermiso('inspecciones', 'ver'), getAllProgramasFito)
-    .post(verificarToken, checkPermiso('inspecciones', 'editar'), addProgramaToInspeccion);
+router.get('/programas', verificarToken, checkPermiso('inspecciones', 'ver'), getAllProgramasFito);
 
-// Eliminar asociación
-router
-    .route('/:id')
-    .delete( verificarToken, checkPermiso('inspecciones', 'editar'), deleteProgramaFromInspeccion);
+
+router.get('/:inspeccion_est_id', verificarToken, checkPermiso('inspecciones', 'ver'), getProgramasByInspeccion);
+
+
+router.post('/', verificarToken, checkPermiso('inspecciones', 'editar'), addProgramaToInspeccion);
+
+router.put('/:id', verificarToken, checkPermiso('inspecciones', 'editar'), updateProgramaInInspeccion);
+
+router.delete('/:id', verificarToken, checkPermiso('inspecciones', 'editar'), deleteProgramaFromInspeccion);
 
 module.exports = router;

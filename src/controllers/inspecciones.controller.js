@@ -39,15 +39,75 @@ const getInspeccionesById = async (req, res, next) => {
     try {
         const { id } = req.params;
         const result = await pool.query(`
-            SELECT ie.*, 
+            SELECT 
+                ie.*, 
                 tif.nombre AS tipo_inspeccion_nombre, 
-                p.nombre AS planificacion_nombre, 
+                plan.id AS planificacion_id,
+                plan.nombre AS planificacion_nombre,
+                plan.fecha_programada AS planificacion_fecha,
+                plan.estado AS planificacion_estado,
                 TO_CHAR(ie.fecha_notificacion, 'YYYY-MM-DD') AS fecha_notificacion, 
                 TO_CHAR(ie.fecha_inspeccion, 'YYYY-MM-DD') AS fecha_inspeccion, 
-                TO_CHAR(ie.fecha_proxima_inspeccion, 'YYYY-MM-DD') AS fecha_proxima_inspeccion
+                TO_CHAR(ie.fecha_proxima_inspeccion, 'YYYY-MM-DD') AS fecha_proxima_inspeccion,
+                prop.id AS propiedad_id,
+                prop.nombre AS propiedad_nombre,
+                prop.ubicación AS propiedad_ubicacion,
+                prop.rif AS propiedad_rif,
+                prop.hectareas AS propiedad_hectareas,
+                prod.id AS productor_id,
+                prod.nombre AS productor_nombre,
+                prod.apellido AS productor_apellido,
+                prod.cedula AS productor_cedula,
+                -- Programas asociados a la inspección
+                (
+                    SELECT COALESCE(json_agg(
+                        json_build_object(
+                            'id', ipf.id,
+                            'programa_id', pf.id,
+                            'nombre', pf.nombre,
+                            'tipo_programa', tpf.nombre,
+                            'observacion', ipf.observacion,
+                            'created_at', ipf.created_at
+                        )
+                    ) FILTER (WHERE ipf.id IS NOT NULL), '[]'::json)
+                    FROM inspeccion_programa_fito ipf
+                    JOIN programa_fito pf ON ipf.programa_fito_id = pf.id
+                    LEFT JOIN tipo_programa_fito tpf ON pf.tipo_programa_fito_id = tpf.id
+                    WHERE ipf.inspeccion_est_id = ie.id
+                ) AS programas_asociados,
+                -- Empleados responsables de la planificación
+                (
+                    SELECT COALESCE(json_agg(
+                        json_build_object(
+                            'id', e.id,
+                            'nombre', e.nombre,
+                            'apellido', e.apellido,
+                            'cedula', e.cedula,
+                            'cargo', c.nombre
+                        )
+                    ) FILTER (WHERE e.id IS NOT NULL), '[]'::json)
+                    FROM planificacion_empleado pe
+                    JOIN empleados e ON pe.empleado_id = e.id
+                    LEFT JOIN cargo c ON e.cargo_id = c.id
+                    WHERE pe.planificacion_id = plan.id
+                ) AS empleados_responsables,
+                -- Imágenes asociadas a la inspección
+                (
+                    SELECT COALESCE(json_agg(
+                        json_build_object(
+                            'id', ii.id,
+                            'imagen', ii.imagen
+                        )
+                    ) FILTER (WHERE ii.id IS NOT NULL), '[]'::json)
+                    FROM inspeccion_imagen ii
+                    WHERE ii.inspeccion_est_id = ie.id
+                ) AS imagenes
             FROM inspeccion_est ie
             LEFT JOIN tipo_inspeccion_fito tif ON ie.tipo_inspeccion_fito_id = tif.id
-            LEFT JOIN planificacion p ON ie.planificacion_id = p.id
+            LEFT JOIN planificacion plan ON ie.planificacion_id = plan.id
+            LEFT JOIN solicitud sol ON plan.solicitud_id = sol.id
+            LEFT JOIN propiedad prop ON sol.propiedad_id = prop.id
+            LEFT JOIN productor prod ON prop.productor_id = prod.id
             WHERE ie.id = $1;
         `, [id]);
 
@@ -56,12 +116,6 @@ const getInspeccionesById = async (req, res, next) => {
         }
 
         const inspeccion = result.rows[0];
-
-        const imagenesRes = await pool.query(`
-            SELECT id, imagen FROM inspeccion_imagen WHERE inspeccion_est_id = $1
-        `, [inspeccion.id]);
-        inspeccion.imagenes = imagenesRes.rows;
-
         res.json(inspeccion);
     } catch (error) {
         console.error('Error obteniendo inspección_est por id:', error);
