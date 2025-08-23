@@ -66,7 +66,7 @@ const createParroquia = async (req, res, next) => {
         );
         await registrarBitacora({
             accion: 'REGISTRO',
-            tabla: 'parroquias',
+            tabla: 'Parroquias',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se creo la parroquia ${nombre}`,
@@ -93,7 +93,7 @@ const updateParroquia = async (req, res, next) => {
         }
         await registrarBitacora({
             accion: 'ACTUALIZO',
-            tabla: 'parroquias',
+            tabla: 'Parroquias',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se actualizo la parroquia ${nombre}`,
@@ -116,7 +116,7 @@ const deleteParroquia = async (req, res, next) => {
         }
         await registrarBitacora({
             accion: 'ELIMINO',
-            tabla: 'parroquia',
+            tabla: 'Parroquias',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se elimino la parroquia ${oldParroquia.rows[0]?.nombre || id}`,

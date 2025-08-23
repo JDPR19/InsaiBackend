@@ -21,16 +21,15 @@ router
 
 router
     .route('/tipo_solicitud/all')
-    .get(verificarToken,checkPermiso('solicitud','ver'), getAllTipoSolicitudes);
-
+    .get(verificarToken, checkPermiso('solicitud', 'ver'), getAllTipoSolicitudes);
 
 router
     .route('/usuarios/all')
-    .get(verificarToken,checkPermiso('solicitud','ver'), getAllUsuarios);
+    .get(verificarToken, checkPermiso('solicitud', 'ver'), getAllUsuarios);
 
 router
     .route('/propiedad/all')
-    .get(verificarToken,checkPermiso('solicitud','ver'), getAllPropiedades);
+    .get(verificarToken, checkPermiso('solicitud', 'ver'), getAllPropiedades);
 
 router
     .route('/:id')

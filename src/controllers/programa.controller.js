@@ -190,7 +190,7 @@ const createPrograma = async (req, res, next) => {
 
         await registrarBitacora({
             accion: 'REGISTRO',
-            tabla: 'programa',
+            tabla: 'Programas',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se creó el programa fito ${nombre}`,
@@ -215,6 +215,7 @@ const updatePrograma = async (req, res, next) => {
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
+        const oldData = await client.query('SELECT * FROM propiedad WHERE id = $1', [id]);
         await client.query(
             `UPDATE programa_fito SET nombre = $1, descripcion = $2, tipo_programa_fito_id = $3 WHERE id = $4`,
             [nombre, descripcion, tipo_programa_fito_id, id]
@@ -253,11 +254,11 @@ const updatePrograma = async (req, res, next) => {
 
         await registrarBitacora({
             accion: 'ACTUALIZO',
-            tabla: 'programa',
+            tabla: 'Programas',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se actualizó el programa fito ${nombre}`,
-            dato: { nuevos: { id, nombre, descripcion, tipo_programa_fito_id, empleados_ids, plaga_fito_ids } }
+            dato: { anteriores: oldData.rows[0], nuevos: { id, nombre, descripcion, tipo_programa_fito_id, empleados_ids, plaga_fito_ids } }
         });
 
         await client.query('COMMIT');
@@ -276,11 +277,21 @@ const deletePrograma = async (req, res, next) => {
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
+        const oldData = await client.query('SELECT * FROM propiedad WHERE id = $1', [id]);
         await client.query(`DELETE FROM programa_cultivo WHERE programa_fito_id = $1`, [id]);
         await client.query(`DELETE FROM programa_empleado WHERE programa_fito_id = $1`, [id]);
         await client.query(`DELETE FROM programa_plaga WHERE programa_fito_id = $1`, [id]);
         await client.query(`DELETE FROM programa_fito WHERE id = $1`, [id]);
         await client.query('COMMIT');
+
+        await registrarBitacora({
+            accion: 'Elimino',
+            tabla: 'Programas',
+            usuario: req.user.username,
+            usuario_id: req.user.id,
+            descripcion: `Se eliminó el programa con id ${id}`,
+            dato: { eliminados: oldData.rows[0] }
+        });
         res.sendStatus(204);
     } catch (error) {
         await client.query('ROLLBACK');

@@ -152,7 +152,7 @@ const createPropiedad = async (req, res, next) => {
 
         await registrarBitacora({
             accion: 'REGISTRO',
-            tabla: 'propiedad',
+            tabla: 'Propiedad',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se creó la propiedad ${nombre}`,
@@ -198,7 +198,7 @@ const updatePropiedad = async (req, res, next) => {
 
         await registrarBitacora({
             accion: 'ACTUALIZO',
-            tabla: 'propiedad',
+            tabla: 'Propiedad',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se actualizó la propiedad ${nombre}`,
@@ -228,7 +228,7 @@ const deletePropiedad = async (req, res, next) => {
 
         await registrarBitacora({
             accion: 'ELIMINO',
-            tabla: 'propiedad',
+            tabla: 'Propiedad',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se eliminó la propiedad con id ${id}`,

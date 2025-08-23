@@ -38,7 +38,7 @@ const createTipoPropiedad = async (req, res, next) => {
         
         await registrarBitacora({
             accion: 'RESGISTRO',
-            tabla: 'tipo de propiedad',
+            tabla: 'Tipos de propiedad',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se creo el tipo de propiedad ${nombre}`,
@@ -71,7 +71,7 @@ const updateTipoPropiedad = async (req, res, next) => {
 
         await registrarBitacora({
             accion: 'ACTUALIZO',
-            tabla: 'tipo de propiedad',
+            tabla: 'Tipos de propiedad',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se actualizo el tipo de propiedad ${nombre}`,
@@ -104,7 +104,7 @@ const deleteTipoPropiedad = async (req, res, next) => {
 
         await registrarBitacora({
             accion: 'ELIMINO',
-            tabla: 'tipo de propiedad',
+            tabla: 'Tipos de propiedad',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se elimino el tipo de propiedad ${oldTipoPropiedad.rows[0]?.nombre || id}`,

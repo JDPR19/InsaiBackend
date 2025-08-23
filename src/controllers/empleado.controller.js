@@ -80,7 +80,7 @@ const createEmpleado = async (req, res, next) => {
         // REGISTRO EN BITÁCORA
         await registrarBitacora({
             accion: 'REGISTRO',
-            tabla: 'empleados',
+            tabla: 'Empleados',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se creó el empleado ${nombre} ${apellido}`,
@@ -138,7 +138,7 @@ const updateEmpleado = async (req, res, next) => {
          // REGISTRO EN BITÁCORA
         await registrarBitacora({
             accion: 'ACTUALIZO',
-            tabla: 'empleados',
+            tabla: 'Empleados',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se actualizó el empleado ${nombre} ${apellido}`,
@@ -180,7 +180,7 @@ const deleteEmpleado = async (req, res, next) => {
         // REGISTRO EN BITÁCORA
         await registrarBitacora({
             accion: 'ELIMINO',
-            tabla: 'empleados',
+            tabla: 'Empleados',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se eliminó el empleado ${oldEmpleado.rows[0]?.nombre || id}`,

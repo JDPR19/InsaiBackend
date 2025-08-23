@@ -40,7 +40,7 @@ const createTipoPrograma = async (req, res, next) => {
 
         await registrarBitacora({
             accion: 'REGISTRO',
-            tabla: 'tipo de programa',
+            tabla: 'Tipos de programa',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se creo el tipo de programa ${nombre}`,
@@ -75,7 +75,7 @@ const updateTipoPrograma = async (req, res, next) => {
 
         await registrarBitacora({
             accion: 'ACTUALIZO',
-            tabla: 'tipo de programa',
+            tabla: 'Tipos de programa',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se actualizo el tipo de programa ${nombre}`,
@@ -108,7 +108,7 @@ const deleteTipoPrograma = async (req, res, next) => {
 
         await registrarBitacora({
             accion: 'ELIMINO',
-            tabla: 'tipo de programa',
+            tabla: 'Tipos de programa',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se elimino el tipo de programa ${oldTipoPrograma.rows[0]?.nombre || id}`,

@@ -38,7 +38,7 @@ const createTipoInspeccion = async (req, res, next) => {
         
         await registrarBitacora({
             accion: 'RESGISTRO',
-            tabla: 'tipo de inspección',
+            tabla: 'Tipos de inspección',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se creo el tipo de inspección ${nombre}`,
@@ -71,7 +71,7 @@ const updateTipoInspeccion = async (req, res, next) => {
 
         await registrarBitacora({
             accion: 'ACTUALIZO',
-            tabla: 'tipo de inspección',
+            tabla: 'Tipos de inspección',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se actualizo el tipo de inspeccion ${nombre}`,
@@ -104,7 +104,7 @@ const deleteTipoInspeccion = async (req, res, next) => {
 
         await registrarBitacora({
             accion: 'ELIMINO',
-            tabla: 'tipo de inspección',
+            tabla: 'Tipos de inspección',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se elimino el tipo de inspeccion ${oldTipoInspeccion.rows[0]?.nombre || id}`,

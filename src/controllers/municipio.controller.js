@@ -53,7 +53,7 @@ const createMunicipio = async (req, res, next) => {
         );
         await registrarBitacora({
             accion: 'REGISTRO',
-            tabla: 'municipios',
+            tabla: 'Municipios',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se creó el municipio ${nombre}`,
@@ -80,7 +80,7 @@ const updateMunicipio = async (req, res, next) => {
         }
         await registrarBitacora({
             accion: 'ACTUALIZO',
-            tabla: 'municipios',
+            tabla: 'Municipios',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se actualizó el municipio ${nombre}`,
@@ -103,7 +103,7 @@ const deleteMunicipio = async (req, res, next) => {
         }
         await registrarBitacora({
             accion: 'ELIMINO',
-            tabla: 'municipio',
+            tabla: 'Municipios',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se eliminó el municipio ${oldMunicipio.rows[0]?.nombre || id}`,

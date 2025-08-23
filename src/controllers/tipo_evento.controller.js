@@ -38,7 +38,7 @@ const createTipoEvento = async (req, res, next) => {
         
         await registrarBitacora({
             accion: 'RESGISTRO',
-            tabla: 'tipo de evento',
+            tabla: 'Tipos de evento',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se creo el tipo de evento ${nombre}`,
@@ -71,7 +71,7 @@ const updateTipoEvento = async (req, res, next) => {
 
         await registrarBitacora({
             accion: 'ACTUALIZO',
-            tabla: 'tipo de evento',
+            tabla: 'Tipos de evento',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se actualizo el tipo de evento ${nombre}`,
@@ -104,7 +104,7 @@ const deleteTipoEvento = async (req, res, next) => {
 
         await registrarBitacora({
             accion: 'ELIMINO',
-            tabla: 'tipo de evento',
+            tabla: 'Tipos de evento',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se elimino el tipo de evento ${oldTipoPropiedad.rows[0]?.nombre || id}`,

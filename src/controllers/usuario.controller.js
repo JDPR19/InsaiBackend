@@ -106,7 +106,7 @@ const createUsuario = async (req, res, next) => {
         // REGISTRO EN BITÁCORA
         await registrarBitacora({
             accion: 'REGISTRO',
-            tabla: 'usuarios',
+            tabla: 'Usuarios',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se creó el usuario ${username}`,
@@ -145,7 +145,7 @@ const updateUsuario = async (req, res, next) => {
         // REGISTRO EN BITÁCORA
         await registrarBitacora({
             accion: 'ACTUALIZO',
-            tabla: 'usuarios',
+            tabla: 'Usuarios',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se actualizó el usuario ${username}`,
@@ -185,7 +185,7 @@ const disableUsuario = async (req, res, next) => {
         // REGISTRO EN BITÁCORA
         await registrarBitacora({
             accion: estado ? 'HABILITO' : 'DESHABILITO',
-            tabla: 'usuarios',
+            tabla: 'Usuarios',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se ${estado ? 'habilitó' : 'deshabilitó'} el usuario ${oldUser.rows[0]?.username || id}`,
@@ -221,7 +221,7 @@ const deleteUsuario = async (req, res, next) => {
         // REGISTRO EN BITÁCORA
         await registrarBitacora({
             accion: 'ELIMINO',
-            tabla: 'usuarios',
+            tabla: 'Usuarios',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se eliminó  el usuario ${oldUser.rows[0]?.username || id}`,

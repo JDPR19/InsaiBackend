@@ -36,7 +36,7 @@ const createCargo = async (req, res, next) => {
         // REGISTRO EN BITÁCORA
         await registrarBitacora({
             accion: 'REGISTRO',
-            tabla: 'cargos',
+            tabla: 'Cargos',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se creó el cargo ${nombre}`,
@@ -70,7 +70,7 @@ const updateCargo = async (req, res, next) => {
         // REGISTRO EN BITÁCORA
         await registrarBitacora({
             accion: 'ACTUALIZO',
-            tabla: 'cargos',
+            tabla: 'Cargos',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se actualizó el cargo ${nombre}`,
@@ -104,7 +104,7 @@ const deleteCargo = async (req, res, next) => {
         // REGISTRO EN BITÁCORA
         await registrarBitacora({
             accion: 'ELIMINO',
-            tabla: 'cargos',
+            tabla: 'Cargos',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se eliminó el cargo ${oldCargo.rows[0]?.nombre || id}`,

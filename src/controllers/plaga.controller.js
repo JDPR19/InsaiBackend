@@ -58,7 +58,7 @@ const createPlagaFito = async (req, res, next) => {
         );
         await registrarBitacora({
             accion: 'REGISTRO',
-            tabla: 'plaga_fito',
+            tabla: 'Plagas',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se creó la plaga ${nombre}`,
@@ -86,7 +86,7 @@ const updatePlagaFito = async (req, res, next) => {
         }
         await registrarBitacora({
             accion: 'ACTUALIZO',
-            tabla: 'plaga_fito',
+            tabla: 'Plagas',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se actualizó la plaga ${nombre}`,
@@ -110,7 +110,7 @@ const deletePlagaFito = async (req, res, next) => {
         }
         await registrarBitacora({
             accion: 'ELIMINO',
-            tabla: 'plaga_fito',
+            tabla: 'Plagas',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se eliminó la plaga ${oldPlaga.rows[0]?.nombre || id}`,

@@ -48,7 +48,7 @@ const createProductor = async (req, res, next) => {
         );
         await registrarBitacora({
             accion: 'REGISTRO',
-            tabla: 'productor',
+            tabla: 'Productor',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se creó el productor ${nombre} ${apellido}`,
@@ -76,7 +76,7 @@ const updateProductor = async (req, res, next) => {
         }
         await registrarBitacora({
             accion: 'ACTUALIZO',
-            tabla: 'productor',
+            tabla: 'Productor',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se actualizó el productor ${nombre} ${apellido}`,
@@ -99,7 +99,7 @@ const deleteProductor = async (req, res, next) => {
         }
         await registrarBitacora({
             accion: 'ELIMINO',
-            tabla: 'productor',
+            tabla: 'Productor',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se eliminó el productor ${oldProductor.rows[0]?.nombre || id}`,

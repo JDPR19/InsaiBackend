@@ -40,7 +40,7 @@ const createTipoSolicitud = async (req, res, next) => {
 
         await registrarBitacora({
             accion: 'REGISTRO',
-            tabla: 'tipo de solicitud',
+            tabla: 'Tipos de solicitud',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se creo el tipo de solicitud ${nombre}`,
@@ -73,7 +73,7 @@ const updateTipoSolicitud = async (req, res, next) => {
 
         await registrarBitacora({
             accion: 'ACTUALIZO',
-            tabla: 'tipo de Solicitud',
+            tabla: 'Tipos de Solicitud',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se actualizo el tipo de solicitud ${nombre}`,
@@ -105,7 +105,7 @@ const deleteTipoSolicitud = async (req, res, next) => {
 
             await registrarBitacora({
                 accion: 'ELIMINO',
-                tabla: 'tipo de Solicitud',
+                tabla: 'Tipos de Solicitud',
                 usuario: req.user.username,
                 usuario_id: req.user.id,
                 descripcion: `Se elimino el tipo de solicitud ${oldTipoSolicitud.rows[0]?.nombre || id}`,

@@ -59,7 +59,7 @@ const createCultivo = async (req, res, next) => {
         );
         await registrarBitacora({
             accion: 'REGISTRO',
-            tabla: 'cultivo',
+            tabla: 'Cultivos',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se creó el cultivo ${nombre}`,
@@ -87,7 +87,7 @@ const updateCultivo = async (req, res, next) => {
         }
         await registrarBitacora({
             accion: 'ACTUALIZO',
-            tabla: 'cultivo',
+            tabla: 'Cultivos',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se actualizó el cultivo ${nombre}`,
@@ -111,7 +111,7 @@ const deleteCultivo = async (req, res, next) => {
         }
         await registrarBitacora({
             accion: 'ELIMINO',
-            tabla: 'cultivo',
+            tabla: 'Cultivos',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se eliminó el cultivo ${oldCultivo.rows[0]?.nombre || id}`,

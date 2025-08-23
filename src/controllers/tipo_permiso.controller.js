@@ -38,7 +38,7 @@ const createTipoPermiso = async (req, res, next) => {
         
         await registrarBitacora({
             accion: 'RESGISTRO',
-            tabla: 'tipo de permiso',
+            tabla: 'Tipos de permiso',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se creo el tipo de permiso ${nombre}`,
@@ -71,7 +71,7 @@ const updateTipoPermiso = async (req, res, next) => {
 
         await registrarBitacora({
             accion: 'ACTUALIZO',
-            tabla: 'tipo de permiso',
+            tabla: 'Tipos de permiso',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se actualizo el tipo de permiso ${nombre}`,
@@ -104,7 +104,7 @@ const deleteTipoPermiso = async (req, res, next) => {
 
         await registrarBitacora({
             accion: 'ELIMINO',
-            tabla: 'tipo de permiso',
+            tabla: 'Tipos de permiso',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se elimino el tipo de permiso ${oldTipoPermiso.rows[0]?.nombre || id}`,

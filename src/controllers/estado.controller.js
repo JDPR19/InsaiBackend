@@ -42,7 +42,7 @@ const createEstado = async (req, res, next) => {
 
         await registrarBitacora({
             accion: 'REGISTRO',
-            tabla: 'estados',
+            tabla: 'Estados',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se creo el estado ${nombre}`,
@@ -77,7 +77,7 @@ const updateEstado = async (req, res, next) => {
 
         await registrarBitacora({
             accion: 'ACTUALIZO',
-            tabla: 'estados',
+            tabla: 'Estados',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se actualizo el estado ${nombre}`,
@@ -111,7 +111,7 @@ const deleteEstado = async (req, res, next) => {
 
         await registrarBitacora({
             accion: 'ELIMINO',
-            tabla: 'estado',
+            tabla: 'Estados',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se elimino el estado ${oldEstado.rows[0]?.nombre || id}`,

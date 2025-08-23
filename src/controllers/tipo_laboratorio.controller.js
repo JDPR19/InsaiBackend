@@ -38,7 +38,7 @@ const createTipoLaboratorio = async (req, res, next) => {
         
         await registrarBitacora({
             accion: 'RESGISTRO',
-            tabla: 'tipo de laboratorio',
+            tabla: 'Tipos de laboratorio',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se creo el tipo de laboratorio ${nombre}`,
@@ -71,7 +71,7 @@ const updateTipoLaboratorio = async (req, res, next) => {
 
         await registrarBitacora({
             accion: 'ACTUALIZO',
-            tabla: 'tipo de laboratorio',
+            tabla: 'Tipos de laboratorio',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se actualizo el tipo de laboratorio ${nombre}`,
@@ -104,7 +104,7 @@ const deleteTipoLaboratorio = async (req, res, next) => {
 
         await registrarBitacora({
             accion: 'ELIMINO',
-            tabla: 'tipo de laboratorio',
+            tabla: 'Tipos de laboratorio',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se elimino el tipo de laboratorio ${oldTipoLaboratorio.rows[0]?.nombre || id}`,

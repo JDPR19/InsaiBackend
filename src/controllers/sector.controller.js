@@ -87,7 +87,7 @@ const createSector = async (req, res, next) => {
 
         await registrarBitacora({
             accion: 'REGISTRO',
-            tabla: 'sector',
+            tabla: 'Sector',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se creo el sector ${nombre}`,
@@ -120,7 +120,7 @@ const updateSector = async (req, res, next) => {
 
         await registrarBitacora({
             accion: 'ACTUALIZO',
-            tabla: 'sector',
+            tabla: 'Sector',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se actualizó el sector ${nombre}`,
@@ -151,7 +151,7 @@ const deleteSector = async (req, res, next) => {
 
         await registrarBitacora({
             accion: 'ELIMINO',
-            tabla: 'sector',
+            tabla: 'Sector',
             usuario: req.user.username,
             usuario_id: req.user.id,
             descripcion: `Se eliminó el cargo ${oldSector.rows[0]?.nombre || id}`,

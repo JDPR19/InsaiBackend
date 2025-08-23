@@ -11,12 +11,9 @@ const {
 
 const router = Router();
 
-
 router.get('/programas', verificarToken, checkPermiso('inspecciones', 'ver'), getAllProgramasFito);
 
-
 router.get('/:inspeccion_est_id', verificarToken, checkPermiso('inspecciones', 'ver'), getProgramasByInspeccion);
-
 
 router.post('/', verificarToken, checkPermiso('inspecciones', 'editar'), addProgramaToInspeccion);
 
