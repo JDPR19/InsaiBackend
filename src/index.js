@@ -38,6 +38,7 @@ const solicitud = require('./routes/solicitud.routes');
 const planificacion = require('./routes/planificacion.routes');
 const notificacionRoutes = require('./routes/notificacion.routes');
 const seguimiento = require('./routes/seguimiento.routes');
+const finalidades = require('./routes/finalidad.routes');
 
 const app = express();
 app.use(express.json());
@@ -47,6 +48,7 @@ app.use(cors());
 app.use(morgan('dev'));
 
 // Rutas
+app.use('/finalidad_catalogo', finalidades);
 app.use('/seguimiento', seguimiento);
 app.use('/notificaciones', notificacionRoutes);
 app.use('/planificacion', planificacion);

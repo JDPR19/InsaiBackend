@@ -35,6 +35,7 @@ const getAllPlanificaciones = async (req, res, next) => {
                 p.*, 
                 TO_CHAR(p.fecha_programada, 'YYYY-MM-DD') AS fecha_programada,
                 s.descripcion AS solicitud_descripcion,
+                s.codigo AS solicitud_codigo,
                 s.estado AS solicitud_estado,
                 tif.nombre AS tipo_inspeccion_nombre,
                 -- Historial de estados

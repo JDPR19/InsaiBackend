@@ -8,18 +8,22 @@ const path = require('path');
 const getAllInspecciones = async (req, res, next) => {
     try {
         const result = await pool.query(`
-            SELECT ie.*, tif.nombre AS tipo_inspeccion_nombre, p.id AS planificacion_id, p.fecha_programada AS planificacion_fecha,
-            TO_CHAR(ie.fecha_inspeccion, 'YYYY-MM-DD') AS fecha_inspeccion, 
-            TO_CHAR(ie.fecha_notificacion, 'YYYY-MM-DD') AS fecha_notificacion, 
-            TO_CHAR(ie.fecha_proxima_inspeccion, 'YYYY-MM-DD') AS fecha_proxima_inspeccion,
-            (
-                SELECT COALESCE(json_agg(h), '[]'::json)
-                FROM historial_estado h
-                WHERE h.entidad = 'inspeccion_est' AND h.entidad_id = ie.id
-            ) AS historial_estados
+            SELECT ie.*, 
+                p.id AS planificacion_id, 
+                p.fecha_programada AS planificacion_fecha,
+                tif.id AS tipo_inspeccion_fito_id,
+                tif.nombre AS tipo_inspeccion_nombre,
+                TO_CHAR(ie.fecha_inspeccion, 'YYYY-MM-DD') AS fecha_inspeccion, 
+                TO_CHAR(ie.fecha_notificacion, 'YYYY-MM-DD') AS fecha_notificacion, 
+                TO_CHAR(ie.fecha_proxima_inspeccion, 'YYYY-MM-DD') AS fecha_proxima_inspeccion,
+                (
+                    SELECT COALESCE(json_agg(h), '[]'::json)
+                    FROM historial_estado h
+                    WHERE h.entidad = 'inspeccion_est' AND h.entidad_id = ie.id
+                ) AS historial_estados
             FROM inspeccion_est ie
-            LEFT JOIN tipo_inspeccion_fito tif ON ie.tipo_inspeccion_fito_id = tif.id
             LEFT JOIN planificacion p ON ie.planificacion_id = p.id
+            LEFT JOIN tipo_inspeccion_fito tif ON p.tipo_inspeccion_fito_id = tif.id
             ORDER BY ie.id DESC
         `);
 
@@ -56,7 +60,9 @@ const getInspeccionesById = async (req, res, next) => {
         const result = await pool.query(`
             SELECT 
                 ie.*, 
-                tif.nombre AS tipo_inspeccion_nombre, 
+                tif.nombre AS tipo_inspeccion_nombre,
+                solicitud.id AS solicitud_id,
+                solicitud.codigo AS solicitud_codigo, 
                 plan.id AS planificacion_id,
                 plan.fecha_programada AS planificacion_fecha,
                 plan.estado AS planificacion_estado,
@@ -143,7 +149,7 @@ const createInspecciones = async (req, res, next) => {
         n_control, codigo_inspeccion, area, fecha_notificacion, fecha_inspeccion, hora_inspeccion,
         responsable_e, cedula_res, tlf, norte, este, zona, correo,
         aspectos, ordenamientos, fecha_proxima_inspeccion, estado,
-        tipo_inspeccion_fito_id, planificacion_id,
+        planificacion_id,
         finalidades // Array de { finalidad_id, objetivo }
     } = req.body;
 
@@ -159,15 +165,15 @@ const createInspecciones = async (req, res, next) => {
                 n_control, codigo_inspeccion, area, fecha_notificacion, fecha_inspeccion, hora_inspeccion,
                 responsable_e, cedula_res, tlf, norte, este, zona, correo,
                 aspectos, ordenamientos, fecha_proxima_inspeccion, estado,
-                tipo_inspeccion_fito_id, planificacion_id
+                planificacion_id
             ) VALUES (
-                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
             ) RETURNING *
         `, [
             n_control, codigo_inspeccion, area, fecha_notificacion, fecha_inspeccion, hora_inspeccion,
             responsable_e, cedula_res, tlf, norteVal, esteVal, zonaVal, correo,
             aspectos, ordenamientos, fecha_proxima_inspeccion, estado,
-            tipo_inspeccion_fito_id, planificacion_id
+            planificacion_id
         ]);
         const inspeccionEstId = result.rows[0].id;
         const codigoInspeccion = result.rows[0].codigo_inspeccion || inspeccionEstId;
@@ -191,15 +197,19 @@ const createInspecciones = async (req, res, next) => {
                 );
             }
         }
-
         // Notificación por registro de inspección
-        await crearYEmitirNotificacion(req, null, {
-            mensaje: `Se ha registrado una nueva inspección con código ${codigoInspeccion}. Responsable: ${responsable_e || 'No especificado'}`
-        });
+        const usuario_id = req.user?.id;
+        if (usuario_id) {
+            await crearYEmitirNotificacion(req, null, {
+                usuario_id,
+                mensaje: `Se ha registrado una nueva inspección con código ${codigoInspeccion}.`
+            });
+        }
 
         // Notificación si el estado es especial
         if (['finalizada', 'cuarentena', 'rechazada'].includes(estado)) {
             await crearYEmitirNotificacion(req, null, {
+                usuario_id,
                 mensaje: `La inspección ${codigoInspeccion} ha cambiado a estado: ${estado}.`
             });
         }
@@ -232,7 +242,7 @@ const updateInspecciones = async (req, res, next) => {
         const {
             n_control, codigo_inspeccion, area, fecha_notificacion, fecha_inspeccion, hora_inspeccion,
             responsable_e, cedula_res, correo, tlf, norte, este, zona, aspectos,
-            ordenamientos, fecha_proxima_inspeccion, estado, tipo_inspeccion_fito_id, planificacion_id,
+            ordenamientos, fecha_proxima_inspeccion, estado, planificacion_id,
             finalidades, imagenesAEliminar = []
         } = req.body;
 
@@ -261,14 +271,13 @@ const updateInspecciones = async (req, res, next) => {
                 ordenamientos = $15,
                 fecha_proxima_inspeccion = $16,
                 estado = $17,
-                tipo_inspeccion_fito_id = $18,
-                planificacion_id = $19,
+                planificacion_id = $18,
                 updated_at = NOW()
-            WHERE id = $20`,
+            WHERE id = $19`,
             [
                 n_control, codigo_inspeccion, area, fecha_notificacion, fecha_inspeccion, hora_inspeccion,
                 responsable_e, cedula_res, correo, tlf, norteVal, esteVal, zonaVal, aspectos,
-                ordenamientos, fecha_proxima_inspeccion, estado, tipo_inspeccion_fito_id, planificacion_id, id
+                ordenamientos, fecha_proxima_inspeccion, estado, planificacion_id, id
             ]
         );
 
@@ -406,7 +415,7 @@ const getTiposInspeccion = async (req, res, next) => {
 const getAllPlanificaciones = async (req, res, next) => {
     try {
         const result = await pool.query(`
-            SELECT p.*, s.descripcion AS solicitud_descripcion, s.estado AS solicitud_estado
+            SELECT p.*, s.descripcion AS solicitud_descripcion, s.estado AS solicitud_estado, s.codigo AS solicitud_codigo
             FROM planificacion p
             LEFT JOIN solicitud s ON p.solicitud_id = s.id
             ORDER BY p.id DESC
@@ -426,5 +435,5 @@ module.exports = {
     deleteInspecciones,
     getAllImagenes,
     getTiposInspeccion,
-    getAllPlanificaciones
+    getAllPlanificaciones,
 };
